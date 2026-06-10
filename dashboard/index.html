@@ -364,7 +364,7 @@ body.real-mode .real-only.grid{display:grid;}
           <div class="kpi-value" id="kpi-activity-value" style="color:var(--green)">84</div>
           <span class="kpi-trend trend-up demo-only">↑ +3</span>
         </div>
-        <div class="kpi-sub" id="kpi-activity-sub">Avg across 48 pens · updated 60s</div>
+        <div class="kpi-sub" id="kpi-activity-sub">Avg across 12 pens · updated 60s</div>
         <canvas class="kpi-spark demo-only" id="spark-activity" height="28"></canvas>
       </div>
 
@@ -385,7 +385,7 @@ body.real-mode .real-only.grid{display:grid;}
       <div class="kpi-card">
         <div class="kpi-label">Shed Temperature</div>
         <div class="range-avg" id="kpi-temp-value">29.4<span style="font-size:16px;font-weight:400;color:var(--text-2)">°C</span></div>
-        <div class="kpi-sub" id="kpi-temp-sub">Shed average · 12 zones</div>
+        <div class="kpi-sub" id="kpi-temp-sub">Shed average · 12 pens</div>
         <div class="range-bar demo-only" id="temp-range-bar">
           <div class="range-track"><div class="range-fill" style="left:12%;right:18%"></div></div>
           <div class="range-ends"><span>28.1°C</span><span>32.7°C</span></div>
@@ -409,9 +409,9 @@ body.real-mode .real-only.grid{display:grid;}
         <div id="alerts-card-body">
           <div class="alerts-count">3</div>
           <div class="alert-breakdown">
-            <div class="ab-item"><div class="ab-dot" style="background:var(--red)"></div><span>1 Critical &mdash; Zone 4L clustering</span></div>
-            <div class="ab-item"><div class="ab-dot" style="background:var(--amber)"></div><span>1 Warning &mdash; Litter Zone 2R</span></div>
-            <div class="ab-item"><div class="ab-dot" style="background:var(--blue)"></div><span>1 Info &mdash; Temp Zone 6R</span></div>
+            <div class="ab-item"><div class="ab-dot" style="background:var(--red)"></div><span>1 Critical &mdash; Pen 4 clustering</span></div>
+            <div class="ab-item"><div class="ab-dot" style="background:var(--amber)"></div><span>1 Warning &mdash; Litter Pen 8</span></div>
+            <div class="ab-item"><div class="ab-dot" style="background:var(--blue)"></div><span>1 Info &mdash; Temp Pen 12</span></div>
           </div>
         </div>
       </div>
@@ -431,9 +431,9 @@ body.real-mode .real-only.grid{display:grid;}
     </div>
     <div class="timeline-track">
       <div class="timeline-events demo-only">
-        <div class="t-marker warning" style="left:29.2%" title="07:00 — Litter moisture rising Zone 2R"></div>
-        <div class="t-marker critical" style="left:48.8%" title="11:42 — Clustering alert Zone 4L"></div>
-        <div class="t-marker info" style="left:54.5%" title="13:05 — Temp approaching limit Zone 6R"></div>
+        <div class="t-marker warning" style="left:29.2%" title="07:00 — Litter moisture rising Pen 8"></div>
+        <div class="t-marker critical" style="left:48.8%" title="11:42 — Clustering alert Pen 4"></div>
+        <div class="t-marker info" style="left:54.5%" title="13:05 — Temp approaching limit Pen 12"></div>
       </div>
       <input type="range" id="timeline-range" class="timeline-range" min="0" max="100" value="75">
     </div>
@@ -447,7 +447,7 @@ body.real-mode .real-only.grid{display:grid;}
     <div class="alert-card critical">
       <div class="alert-top">
         <span class="alert-badge">CRITICAL</span>
-        <span class="alert-zone">Zone 4L — Row 3</span>
+        <span class="alert-zone">Pen 4</span>
         <span class="alert-time">11:42</span>
       </div>
       <div class="alert-msg">Abnormal clustering detected · Intensity 0.92 · Activity index 48</div>
@@ -456,7 +456,7 @@ body.real-mode .real-only.grid{display:grid;}
     <div class="alert-card warning">
       <div class="alert-top">
         <span class="alert-badge">WARNING</span>
-        <span class="alert-zone">Zone 2R — Row 2</span>
+        <span class="alert-zone">Pen 8</span>
         <span class="alert-time">09:15</span>
       </div>
       <div class="alert-msg">Litter saturation threshold exceeded · Index 0.72 · FPD risk 6.2</div>
@@ -465,7 +465,7 @@ body.real-mode .real-only.grid{display:grid;}
     <div class="alert-card info">
       <div class="alert-top">
         <span class="alert-badge">INFO</span>
-        <span class="alert-zone">Zone 6R — Row 1</span>
+        <span class="alert-zone">Pen 12</span>
         <span class="alert-time">13:05</span>
       </div>
       <div class="alert-msg">Temperature approaching upper limit · 32.7°C · Target max 32°C</div>
@@ -476,7 +476,7 @@ body.real-mode .real-only.grid{display:grid;}
     <div class="alert-card info" style="border-left-color:var(--green);background:rgba(40,212,114,.06);">
       <div class="alert-top">
         <span class="alert-badge" style="background:rgba(40,212,114,.2);color:var(--green);">OK</span>
-        <span class="alert-zone">Zone 3L — Node 1</span>
+        <span class="alert-zone">Pen 3 — Node 1</span>
       </div>
       <div class="alert-msg">No active alerts · live sensor data nominal</div>
     </div>
@@ -487,7 +487,7 @@ body.real-mode .real-only.grid{display:grid;}
 <div id="tab-birdhealth" class="tab-panel">
   <div class="real-placeholder real-only">
     <div class="rp-title">Live data only</div>
-    <div class="rp-sub">Bird health analytics (activity trends, weight curves, clustering heatmaps, mortality risk) require historical data across multiple zones. Only Zone 3L (Node 1) is currently deployed and reporting live mmWave data — switch to Demo Mode to see the full storyline.</div>
+    <div class="rp-sub">Bird health analytics (activity trends, weight curves, clustering heatmaps, mortality risk) require historical data across multiple pens. Only Pen 3 (Node 1) is currently deployed and reporting live mmWave data — switch to Demo Mode to see the full storyline.</div>
   </div>
   <div class="bh-layout demo-only">
 
@@ -496,9 +496,9 @@ body.real-mode .real-only.grid{display:grid;}
       <div class="section-header">
         <div class="chart-title">Flock Activity Index — 7 Day Trend</div>
         <span class="section-tag">BEHAVIOUR</span>
-        <span class="early-flag">⚠ Early decline flag · Zone 4L</span>
+        <span class="early-flag">⚠ Early decline flag · Pen 4</span>
       </div>
-      <div class="chart-sub">Per-zone activity index (0–100 scale) · mmWave Doppler velocity + density</div>
+      <div class="chart-sub">Per-pen activity index (0–100 scale) · mmWave Doppler velocity + density</div>
       <div class="chart-area" style="height:200px;"><canvas id="activity-chart"></canvas></div>
     </div>
 
@@ -515,7 +515,7 @@ body.real-mode .real-only.grid{display:grid;}
     <!-- Clustering heatmap -->
     <div class="chart-card">
       <div class="section-header">
-        <div class="chart-title">Clustering Intensity — Zone 4L</div>
+        <div class="chart-title">Clustering Intensity — Pen 4</div>
         <span class="section-tag">SPATIAL</span>
       </div>
       <div class="chart-sub">7 days × 24 hours · Warmer = denser clustering · Pattern shows early-morning accumulation</div>
@@ -531,16 +531,16 @@ body.real-mode .real-only.grid{display:grid;}
     <!-- Pre-mortality risk -->
     <div class="chart-card">
       <div class="section-header">
-        <div class="chart-title">Pre-Mortality Risk — All Zones</div>
+        <div class="chart-title">Pre-Mortality Risk — All Pens</div>
         <span class="section-tag">MORTALITY</span>
       </div>
       <div class="chart-sub">Zero-Doppler density + activity collapse score · Amber = monitor threshold</div>
-      <div style="font-size:10px;color:var(--text-2);margin-bottom:6px;">Left side (L) — Zones 1–6 · 4 rows each</div>
+      <div style="font-size:10px;color:var(--text-2);margin-bottom:6px;">Left side — Pens 1–6</div>
       <div class="premort-grid" id="premort-grid-left"></div>
-      <div style="font-size:10px;color:var(--text-2);margin:10px 0 6px;">Right side (R) — Zones 1–6 · 4 rows each</div>
+      <div style="font-size:10px;color:var(--text-2);margin:10px 0 6px;">Right side — Pens 7–12</div>
       <div class="premort-grid" id="premort-grid-right"></div>
       <div class="premort-stats">
-        <div class="pstat"><div class="pstat-label">Zone 4L Row 3 — Zero-Doppler density</div><div class="pstat-val">0.84</div></div>
+        <div class="pstat"><div class="pstat-label">Pen 4 — Zero-Doppler density</div><div class="pstat-val">0.84</div></div>
         <div class="pstat"><div class="pstat-label">Activity collapse score</div><div class="pstat-val">0.67</div></div>
         <div class="pstat"><div class="pstat-label">Risk composite</div><div class="pstat-val" style="color:var(--red)">HIGH</div></div>
       </div>
@@ -553,7 +553,7 @@ body.real-mode .real-only.grid{display:grid;}
 <div id="tab-operations" class="tab-panel">
   <div class="real-placeholder real-only">
     <div class="rp-title">Live data only</div>
-    <div class="rp-sub">Litter substrate mapping, ventilation fault logs, and shed-wide temperature/humidity trends require sensors across all zones. Only Zone 3L (Node 1) is currently deployed and reporting live data — switch to Demo Mode to see the full storyline.</div>
+    <div class="rp-sub">Litter substrate mapping, ventilation fault logs, and shed-wide temperature/humidity trends require sensors across all pens. Only Pen 3 (Node 1) is currently deployed and reporting live data — switch to Demo Mode to see the full storyline.</div>
   </div>
   <div class="ops-layout demo-only">
 
@@ -580,7 +580,7 @@ body.real-mode .real-only.grid{display:grid;}
           <div class="chart-title">Temperature & Humidity — 48h</div>
           <span class="section-tag">ENVIRONMENT</span>
         </div>
-        <div class="chart-sub">4 zones · Bird-level sensors (1m above litter) · Shaded = comfort range</div>
+        <div class="chart-sub">3 pens · Bird-level sensors (1m above litter) · Shaded = comfort range</div>
         <div class="chart-area" style="height:260px;"><canvas id="trh-chart"></canvas></div>
       </div>
     </div>
@@ -595,36 +595,36 @@ body.real-mode .real-only.grid{display:grid;}
       <table class="fault-table">
         <thead>
           <tr>
-            <th>Time</th><th>Zone</th><th>Condition Detected</th><th>Recommended Action</th><th>Status</th>
+            <th>Time</th><th>Pen</th><th>Condition Detected</th><th>Recommended Action</th><th>Status</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td style="font-family:'IBM Plex Mono',monospace;color:var(--text-2)">13:05</td>
-            <td><strong>Zone 6R</strong></td>
+            <td><strong>Pen 12</strong></td>
             <td>Temperature at 32.7°C — approaching upper welfare limit (32°C target)</td>
-            <td>Check east-wall ventilation fans · Increase airflow rate to Zone 6</td>
+            <td>Check east-wall ventilation fans · Increase airflow rate to Pen 12</td>
             <td><span class="status-pill status-active">ACTIVE</span></td>
           </tr>
           <tr>
             <td style="font-family:'IBM Plex Mono',monospace;color:var(--text-2)">09:15</td>
-            <td><strong>Zone 2R</strong></td>
+            <td><strong>Pen 8</strong></td>
             <td>Humidity spike +9% above threshold · Backscatter index 0.72 rising</td>
-            <td>Inspect drinker lines rows 1–2 Zone 2R for leaks · Consider partial litter removal</td>
+            <td>Inspect drinker lines in Pen 8 for leaks · Consider partial litter removal</td>
             <td><span class="status-pill status-invest">INVESTIGATING</span></td>
           </tr>
           <tr>
             <td style="font-family:'IBM Plex Mono',monospace;color:var(--text-2)">04:15</td>
-            <td><strong>Zone 3L</strong></td>
-            <td>Activity drop during rest period — possible cold stress in rows 3–4</td>
-            <td>Checked heating elements Zone 3L · Adjusted thermostat setpoint +0.5°C</td>
+            <td><strong>Pen 3</strong></td>
+            <td>Activity drop during rest period — possible cold stress</td>
+            <td>Checked heating elements Pen 3 · Adjusted thermostat setpoint +0.5°C</td>
             <td><span class="status-pill status-resolved">RESOLVED</span></td>
           </tr>
           <tr>
             <td style="font-family:'IBM Plex Mono',monospace;color:var(--text-2)">01:30</td>
-            <td><strong>Zone 5R</strong></td>
-            <td>Avoidance zone detected — persistent low density (&lt;30% expected) since midnight</td>
-            <td>Inspect feeder access Zone 5R Row 2 · Check feed auger cycle timing</td>
+            <td><strong>Pen 11</strong></td>
+            <td>Avoidance behaviour detected — persistent low density (&lt;30% expected) since midnight</td>
+            <td>Inspect feeder access in Pen 11 · Check feed auger cycle timing</td>
             <td><span class="status-pill status-resolved">RESOLVED</span></td>
           </tr>
         </tbody>
@@ -642,40 +642,40 @@ body.real-mode .real-only.grid{display:grid;}
 
         <div class="ai-msg assistant real-only">
           <span class="msg-sender">FLOCKSENSE AI</span>
-          <div class="msg-bubble">Hi! Live Data Only mode is active — I currently have live mmWave data from <strong>Node 1 (Zone 3L)</strong> only. Ask me about activity, clustering, temperature or humidity for that zone.</div>
+          <div class="msg-bubble">Hi! Live Data Only mode is active — I currently have live mmWave data from <strong>Node 1 (Pen 3)</strong> only. Ask me about activity, clustering, temperature or humidity for that pen.</div>
         </div>
 
         <div class="ai-msg user demo-only">
           <span class="msg-sender">YOU</span>
-          <div class="msg-bubble">Which zones had elevated litter moisture this week?</div>
+          <div class="msg-bubble">Which pens had elevated litter moisture this week?</div>
         </div>
 
         <div class="ai-msg assistant demo-only">
           <span class="msg-sender">FLOCKSENSE AI</span>
-          <div class="msg-bubble">Based on backscatter intensity readings over the past 7 days, two zones show elevated moisture above the 35% threshold:<br><br>
-          <strong>Zone 2R</strong> (right side): Moisture index trending upward since Day 15, now reading 0.72 on the 0–1 backscatter scale (~38% estimated moisture). Progression suggests a drinker line issue or localised crowding near water access. FPD risk score is currently <strong style="color:var(--amber)">6.2 / 10</strong>.<br><br>
-          <strong>Zone 4L</strong> (left side): Moderate elevation at 0.55 — amber watch threshold. Slower progression, possibly normal flock-related moisture accumulation at Day 18.</div>
-          <div class="msg-data">RECOMMENDATION → Inspect drinker lines Zone 2R rows 1–2 before next management visit.
+          <div class="msg-bubble">Based on backscatter intensity readings over the past 7 days, two pens show elevated moisture above the 35% threshold:<br><br>
+          <strong>Pen 8</strong>: Moisture index trending upward since Day 15, now reading 0.72 on the 0–1 backscatter scale (~38% estimated moisture). Progression suggests a drinker line issue or localised crowding near water access. FPD risk score is currently <strong style="color:var(--amber)">6.2 / 10</strong>.<br><br>
+          <strong>Pen 4</strong>: Moderate elevation at 0.55 — amber watch threshold. Slower progression, possibly normal flock-related moisture accumulation at Day 18.</div>
+          <div class="msg-data">RECOMMENDATION → Inspect drinker lines in Pen 8 before next management visit.
 If leak confirmed: partial litter removal + replacement recommended.
 FPD risk will escalate above 7.0 within ~36h if untreated.</div>
         </div>
 
         <div class="ai-msg user demo-only">
           <span class="msg-sender">YOU</span>
-          <div class="msg-bubble">Is the activity drop in Zone 4L something to worry about?</div>
+          <div class="msg-bubble">Is the activity drop in Pen 4 something to worry about?</div>
         </div>
 
         <div class="ai-msg assistant demo-only">
           <span class="msg-sender">FLOCKSENSE AI</span>
-          <div class="msg-bubble">The Zone 4L activity trend warrants close attention. The decline has been sustained and accelerating over 4 days:</div>
+          <div class="msg-bubble">The Pen 4 activity trend warrants close attention. The decline has been sustained and accelerating over 4 days:</div>
           <div class="msg-data">Day 14  →  Activity index: 80  (normal range Day 14 Ross 308)
-Day 15  →  Activity index: 74  (first deviation below zone average)
-Day 16  →  Activity index: 68  (1.4 SD below 6-zone mean)
+Day 15  →  Activity index: 74  (first deviation below pen average)
+Day 16  →  Activity index: 68  (1.4 SD below 12-pen mean)
 Day 17  →  Activity index: 59  (accelerating decline)
 Day 18  →  Activity index: 48  ⚠ SIGNIFICANTLY BELOW NORMAL</div>
-          <div class="msg-bubble" style="margin-top:8px;">The clustering alert detected at 11:42 this morning (intensity 0.92) in the same zone strengthens the concern. Lethargy combined with spatial clustering is a recognised pre-disease signature in Ross 308 broilers.<br><br>Historical comparison: a similar pattern in PRF Shed B (Day 22, Flock 12) preceded a confirmed respiratory outbreak by <strong style="color:var(--red)">36 hours</strong>. Early intervention at that stage reduced flock mortality by an estimated 2.1%.<br><br>
+          <div class="msg-bubble" style="margin-top:8px;">The clustering alert detected at 11:42 this morning (intensity 0.92) in the same pen strengthens the concern. Lethargy combined with spatial clustering is a recognised pre-disease signature in Ross 308 broilers.<br><br>Historical comparison: a similar pattern in PRF Shed B (Day 22, Flock 12) preceded a confirmed respiratory outbreak by <strong style="color:var(--red)">36 hours</strong>. Early intervention at that stage reduced flock mortality by an estimated 2.1%.<br><br>
           <strong>Priority actions:</strong><br>
-          1 · Unscheduled walkthrough Zone 4L within 2 hours<br>
+          1 · Unscheduled walkthrough Pen 4 within 2 hours<br>
           2 · Inspect feed + water access for blockage<br>
           3 · Observe for respiratory signs, drooping, reduced vocalisation<br>
           4 · If clinical signs found: notify veterinarian, initiate flock health protocol</div>
@@ -690,28 +690,28 @@ Day 18  →  Activity index: 48  ⚠ SIGNIFICANTLY BELOW NORMAL</div>
     <div class="ai-sidebar">
       <div class="ai-sidebar-title">Quick Insights</div>
       <div class="quick-chips demo-only">
-        <button class="quick-chip" data-q="What is the current footpad dermatitis risk across all zones?">What is the current FPD risk across all zones?</button>
+        <button class="quick-chip" data-q="What is the current footpad dermatitis risk across all pens?">What is the current FPD risk across all pens?</button>
         <button class="quick-chip" data-q="Compare today's flock activity to the previous 3 flocks at Day 18.">Compare today's activity to previous flocks at Day 18</button>
-        <button class="quick-chip" data-q="Which zones show avoidance behaviour and what could be causing it?">Which zones show avoidance behaviour?</button>
+        <button class="quick-chip" data-q="Which pens show avoidance behaviour and what could be causing it?">Which pens show avoidance behaviour?</button>
         <button class="quick-chip" data-q="Generate a summary report for this flock week for the research log.">Generate weekly research log summary</button>
       </div>
       <div class="quick-chips real-only">
-        <button class="quick-chip" data-q="What is the current activity level in Zone 3L?">What is the current activity level in Zone 3L?</button>
-        <button class="quick-chip" data-q="What is the current temperature and humidity in Zone 3L?">Current temperature & humidity in Zone 3L?</button>
-        <button class="quick-chip" data-q="Is there any clustering detected in Zone 3L?">Is there any clustering detected in Zone 3L?</button>
+        <button class="quick-chip" data-q="What is the current activity level in Pen 3?">What is the current activity level in Pen 3?</button>
+        <button class="quick-chip" data-q="What is the current temperature and humidity in Pen 3?">Current temperature & humidity in Pen 3?</button>
+        <button class="quick-chip" data-q="Is there any clustering detected in Pen 3?">Is there any clustering detected in Pen 3?</button>
       </div>
       <div class="ai-sys-info demo-only">
         <strong style="color:var(--text-2)">System status</strong><br>
         mmWave nodes: <span style="color:var(--green)">6/6 online</span><br>
         T+RH sensors: <span style="color:var(--green)">12/12 online</span><br>
         Last sync: <span style="color:var(--text)">18:00:14</span><br>
-        Data rate: <span style="color:var(--text)">2 fps · 48 pens</span><br>
+        Data rate: <span style="color:var(--text)">2 fps · 12 pens</span><br>
         Edge compute: <span style="color:var(--green)">RPi4 nominal</span>
       </div>
       <div class="ai-sys-info real-only block">
         <strong style="color:var(--text-2)">System status</strong><br>
-        mmWave nodes: <span style="color:var(--green)">1/1 online</span> (Node 1 · Zone 3L)<br>
-        T+RH sensors: <span style="color:var(--green)">1/1 online</span> (Node 1 · Zone 3L)<br>
+        mmWave nodes: <span style="color:var(--green)">1/1 online</span> (Node 1 · Pen 3)<br>
+        T+RH sensors: <span style="color:var(--green)">1/1 online</span> (Node 1 · Pen 3)<br>
         Camera: <span style="color:var(--green)">1/1 online</span><br>
         Edge compute: <span style="color:var(--green)">RPi nominal</span>
       </div>
@@ -731,8 +731,8 @@ Day 18  →  Activity index: 48  ⚠ SIGNIFICANTLY BELOW NORMAL</div>
     <button class="afp-close" id="afp-close">✕</button>
   </div>
   <div class="afp-messages" id="afp-messages">
-    <div class="afp-msg assistant demo-only">Hi! I'm monitoring your flock live. Zone 4L has an active clustering alert. Ask me anything about the shed.</div>
-    <div class="afp-msg assistant real-only block">Hi! Live Data Only mode is active. I have live data from Node 1 (Zone 3L). Ask me anything about that zone.</div>
+    <div class="afp-msg assistant demo-only">Hi! I'm monitoring your flock live. Pen 4 has an active clustering alert. Ask me anything about the shed.</div>
+    <div class="afp-msg assistant real-only block">Hi! Live Data Only mode is active. I have live data from Node 1 (Pen 3). Ask me anything about that pen.</div>
   </div>
   <div class="afp-chips demo-only">
     <button class="afp-chip">Current flock status?</button>
@@ -740,9 +740,9 @@ Day 18  →  Activity index: 48  ⚠ SIGNIFICANTLY BELOW NORMAL</div>
     <button class="afp-chip">Today's weight estimate?</button>
   </div>
   <div class="afp-chips real-only">
-    <button class="afp-chip">Zone 3L activity?</button>
+    <button class="afp-chip">Pen 3 activity?</button>
     <button class="afp-chip">Any urgent alerts?</button>
-    <button class="afp-chip">Zone 3L temperature?</button>
+    <button class="afp-chip">Pen 3 temperature?</button>
   </div>
   <div class="afp-input-row">
     <input class="afp-input" id="afp-input" placeholder="Ask anything…" type="text">
@@ -751,58 +751,51 @@ Day 18  →  Activity index: 48  ⚠ SIGNIFICANTLY BELOW NORMAL</div>
 </div>
 
 <script>
-// Pen indices with a real deployed sensor node (Zone 3L, all 4 rows — Node 1)
-const DEPLOYED_PEN_IDXS = [2, 8, 14, 20];
+// Pen index with the real deployed sensor node — Pen 3 (Node 1)
+const DEPLOYED_PEN_IDXS = [2];
 window.REAL_MODE = false;
 
 // ═══════════════════════════════════════════════
-//  SIMULATED DATA
+//  SIMULATED DATA — 12 pens
 // ═══════════════════════════════════════════════
 const penData = [];
-for (let side = 0; side < 2; side++) {
-  for (let row = 0; row < 4; row++) {
-    for (let col = 0; col < 6; col++) {
-      const act  = 75 + Math.random() * 20;
-      const lit  = 0.08 + Math.random() * 0.22;
-      const tmp  = 28.2 + Math.random() * 2.5;
-      const hum  = 61 + Math.random() * 14;
-      const clus = 0.04 + Math.random() * 0.18;
-      // Welfare: composite 0-100. Penalise high temp, high humidity, poor litter, low activity, clustering.
-      const thi     = tmp + 0.36 * hum - 41.2;
-      const thiPen  = Math.max(0, (thi - 27) / 10);
-      const welfare = Math.round(Math.max(0, Math.min(100,
-        act * 0.35 + (1 - lit) * 30 + (1 - clus) * 20 + (1 - thiPen) * 15)));
-      // FCR: good baseline ~1.45 for Day 18 Ross 308, elevated by poor welfare
-      const fcr = parseFloat((1.42 + (1 - welfare/100) * 0.6 + (Math.random() - 0.5) * 0.06).toFixed(2));
-      // Approx weight: mean z-height proxy → g. Day 18 std 890g ±variance by pen
-      const weight = Math.round(890 + (welfare - 75) * 3.5 + (Math.random() - 0.5) * 40);
-      penData.push({
-        side, row, col,
-        activity: act, litter: lit, temp: tmp, humidity: hum, clustering: clus,
-        welfare, fcr, weight,
-      });
-    }
-  }
+for (let i = 0; i < 12; i++) {
+  const act  = 75 + Math.random() * 20;
+  const lit  = 0.08 + Math.random() * 0.22;
+  const tmp  = 28.2 + Math.random() * 2.5;
+  const hum  = 61 + Math.random() * 14;
+  const clus = 0.04 + Math.random() * 0.18;
+  // Welfare: composite 0-100. Penalise high temp, high humidity, poor litter, low activity, clustering.
+  const thi     = tmp + 0.36 * hum - 41.2;
+  const thiPen  = Math.max(0, (thi - 27) / 10);
+  const welfare = Math.round(Math.max(0, Math.min(100,
+    act * 0.35 + (1 - lit) * 30 + (1 - clus) * 20 + (1 - thiPen) * 15)));
+  // FCR: good baseline ~1.45 for Day 18 Ross 308, elevated by poor welfare
+  const fcr = parseFloat((1.42 + (1 - welfare/100) * 0.6 + (Math.random() - 0.5) * 0.06).toFixed(2));
+  // Approx weight: mean z-height proxy → g. Day 18 std 890g ±variance by pen
+  const weight = Math.round(890 + (welfare - 75) * 3.5 + (Math.random() - 0.5) * 40);
+  penData.push({
+    activity: act, litter: lit, temp: tmp, humidity: hum, clustering: clus,
+    welfare, fcr, weight,
+  });
 }
-// Zone 4L clustering alert: left side (side=0), col=3, row=2 → idx=0*24+2*6+3=15
-penData[15].clustering = 0.92; penData[15].activity = 48;
-penData[14].clustering = 0.55; penData[14].activity = 58; // neighbour
-// Zone 2R litter: right side (side=1), col=1, row=1 → idx=24+1*6+1=31
-penData[31].litter = 0.72; penData[25].litter = 0.55;
-// Zone 6R temp: right side (side=1), col=5, row=0 → idx=24+0*6+5=29
-penData[29].temp = 32.7;
-// Some additional subtle variation
-penData[9].litter  = 0.48;
-penData[38].clustering = 0.42;
+// Pen 4: clustering alert
+penData[3].clustering = 0.92; penData[3].activity = 48;
+penData[4].clustering = 0.35; penData[4].activity = 64; // neighbouring pen, mild elevation
+// Pen 8: litter saturation
+penData[7].litter = 0.72;
+penData[6].litter = 0.48; // neighbouring pen
+// Pen 12: temperature near limit
+penData[11].temp = 32.7;
 
-// Human-readable label for each pen, e.g. "Zone 3L — Row 2"
-const PEN_LABELS = penData.map(d => `Zone ${d.col + 1}${d.side === 0 ? 'L' : 'R'} — Row ${d.row + 1}`);
+// Human-readable label for each pen, e.g. "Pen 3"
+const PEN_LABELS = penData.map((d, i) => `Pen ${i + 1}`);
 
 // Demo-mode alert definitions, mapped to the pens they reference.
 const ALERT_DEFS = [
-  { idx: 15, level: 'critical', label: 'Critical', text: 'Abnormal clustering detected', dot: 'var(--red)' },
-  { idx: 31, level: 'warning',  label: 'Warning',  text: 'Litter saturation rising',     dot: 'var(--amber)' },
-  { idx: 29, level: 'info',     label: 'Info',     text: 'Temperature near upper limit', dot: 'var(--blue)' },
+  { idx: 3,  level: 'critical', label: 'Critical', text: 'Abnormal clustering detected', dot: 'var(--red)' },
+  { idx: 7,  level: 'warning',  label: 'Warning',  text: 'Litter saturation rising',     dot: 'var(--amber)' },
+  { idx: 11, level: 'info',     label: 'Info',     text: 'Temperature near upper limit', dot: 'var(--blue)' },
 ];
 
 // ═══════════════════════════════════════════════
@@ -919,11 +912,12 @@ function initThreeJS() {
   });
 
   // ── PEN TILES & CAGE WIREFRAMES ──
+  // 12 pens total: 6 positions along the shed length, one pen on each side of the aisle.
   const penMeshes = [];
-  const Z_CTR  = [-10, -6, -2, 2, 6, 10];
-  const LX_CTR = [-2.5, -4.5, -6.5, -8.5];
-  const RX_CTR = [ 2.5,  4.5,  6.5,  8.5];
-  const PW = 1.82, PL = 3.82;
+  const Z_CTR = [-10, -6, -2, 2, 6, 10];
+  const LX_CTR = -5.5;
+  const RX_CTR = 5.5;
+  const PW = 7.6, PL = 3.82;
 
   function makePen(x, z, idx) {
     const mat = new THREE.MeshLambertMaterial({ color: 0x28d472 });
@@ -943,23 +937,21 @@ function initThreeJS() {
   }
 
   let pi = 0;
-  for (let row = 0; row < 4; row++)
-    for (let col = 0; col < 6; col++)
-      makePen(LX_CTR[row], Z_CTR[col], pi++);
-  for (let row = 0; row < 4; row++)
-    for (let col = 0; col < 6; col++)
-      makePen(RX_CTR[row], Z_CTR[col], pi++);
+  for (let col = 0; col < 6; col++)
+    makePen(LX_CTR, Z_CTR[col], pi++);
+  for (let col = 0; col < 6; col++)
+    makePen(RX_CTR, Z_CTR[col], pi++);
 
   // ── SENSOR NODES ──
   const sensorObjs = [];
   const cyanMat  = new THREE.MeshBasicMaterial({ color: 0x00c8e0 });
   const orangeMat = new THREE.MeshBasicMaterial({ color: 0xf0a040 });
 
-  // mmWave nodes — ceiling center
+  // mmWave nodes — ceiling center, each covers the pen pair (left + right) at that position
   Z_CTR.forEach((z, i) => {
     const s = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), cyanMat.clone());
     s.position.set(0, 4.78, z);
-    s.userData = { label: `mmWave Node ${i+1} | Zone ${i+1} | SNR: ${(13.5+Math.random()*3).toFixed(1)} dB | 2 fps` };
+    s.userData = { label: `mmWave Node ${i+1} | Pen ${i+1} & Pen ${i+7} | SNR: ${(13.5+Math.random()*3).toFixed(1)} dB | 2 fps` };
     scene.add(s); sensorObjs.push(s);
     const gl = new THREE.PointLight(0x00c8e0, 0.5, 5);
     gl.position.copy(s.position); scene.add(gl);
@@ -1099,13 +1091,11 @@ function initThreeJS() {
       } else if (obj.userData.penIdx !== undefined) {
         const idx = obj.userData.penIdx;
         const d = penData[idx];
-        const side = idx < 24 ? 'L' : 'R';
-        const li = idx % 24;
-        const zone = li % 6 + 1, row = Math.floor(li / 6) + 1;
+        const label = PEN_LABELS[idx];
         if (window.REAL_MODE && !DEPLOYED_PEN_IDXS.includes(idx)) {
-          tip.textContent = `Zone ${zone}${side} R${row}  ·  No live sensor deployed`;
+          tip.textContent = `${label}  ·  No live sensor deployed`;
         } else if (window.REAL_MODE) {
-          tip.textContent = `Zone ${zone}${side} R${row} (Node 1)  ·  Act: ${d.activity.toFixed(0)}  ·  Clustering: ${d.clustering.toFixed(2)}  ·  ${d.temp.toFixed(1)}°C  ${d.humidity.toFixed(0)}%RH`;
+          tip.textContent = `${label} (Node 1)  ·  Act: ${d.activity.toFixed(0)}  ·  Clustering: ${d.clustering.toFixed(2)}  ·  ${d.temp.toFixed(1)}°C  ${d.humidity.toFixed(0)}%RH`;
         } else {
           const ls = d.litter < 0.35 ? 'Friable' : d.litter < 0.65 ? 'Saturated' : 'Caked';
           const layerExtra = {
@@ -1113,7 +1103,7 @@ function initThreeJS() {
             fcr:         `  ·  FCR: ${d.fcr}  ·  ${d.fcr < 1.5 ? '✓ Efficient' : d.fcr < 1.7 ? '⚠ Watch' : '✗ Poor'}`,
             weight:      `  ·  Weight: ~${d.weight}g  ·  Std: 890g  ·  ${d.weight >= 890 ? '+' : ''}${d.weight - 890}g`,
           }[currentLayer] || '';
-          tip.textContent = `Zone ${zone}${side} R${row}  ·  Act: ${d.activity.toFixed(0)}  ·  ${ls}  ·  ${d.temp.toFixed(1)}°C  ${d.humidity.toFixed(0)}%RH${layerExtra}`;
+          tip.textContent = `${label}  ·  Act: ${d.activity.toFixed(0)}  ·  ${ls}  ·  ${d.temp.toFixed(1)}°C  ${d.humidity.toFixed(0)}%RH${layerExtra}`;
         }
       }
       tip.style.display = 'block';
@@ -1251,7 +1241,7 @@ function nearestHistory(date) {
   return best;
 }
 
-// Updates Zone 3L pen data, KPIs, 3D model and camera frame for the given time.
+// Updates Pen 3 pen data, KPIs, 3D model and camera frame for the given time.
 function applyScrub(date) {
   const p = nearestHistory(date);
   if (p) {
@@ -1329,12 +1319,12 @@ playBtn.addEventListener('click', togglePlay);
 function initBirdHealthCharts() {
   const DAYS = ['Day 12','Day 13','Day 14','Day 15','Day 16','Day 17','Day 18'];
   const zones = [
-    { label:'Zone 1L', color:'#28d472', data:[88,87,89,88,87,88,87] },
-    { label:'Zone 2L', color:'#4080ff', data:[83,85,84,83,85,84,83] },
-    { label:'Zone 3L', color:'#a78bfa', data:[82,81,83,82,80,82,81] },
-    { label:'Zone 4L', color:'#f03050', data:[80,79,77,74,68,59,48], borderDash:[0] },
-    { label:'Zone 5R', color:'#00c8e0', data:[86,85,86,85,84,86,85] },
-    { label:'Zone 6R', color:'#f59e0b', data:[84,83,85,84,82,84,83] },
+    { label:'Pen 1',  color:'#28d472', data:[88,87,89,88,87,88,87] },
+    { label:'Pen 2',  color:'#4080ff', data:[83,85,84,83,85,84,83] },
+    { label:'Pen 3',  color:'#a78bfa', data:[82,81,83,82,80,82,81] },
+    { label:'Pen 4',  color:'#f03050', data:[80,79,77,74,68,59,48], borderDash:[0] },
+    { label:'Pen 11', color:'#00c8e0', data:[86,85,86,85,84,86,85] },
+    { label:'Pen 12', color:'#f59e0b', data:[84,83,85,84,82,84,83] },
   ];
   const actCtx = document.getElementById('activity-chart').getContext('2d');
   new Chart(actCtx, {
@@ -1346,8 +1336,8 @@ function initBirdHealthCharts() {
         data: z.data,
         borderColor: z.color,
         backgroundColor: z.color + '12',
-        borderWidth: z.label==='Zone 4L' ? 2.5 : 1.5,
-        pointRadius: z.label==='Zone 4L' ? 4 : 2,
+        borderWidth: z.label==='Pen 4' ? 2.5 : 1.5,
+        pointRadius: z.label==='Pen 4' ? 4 : 2,
         fill: false,
         tension: 0.35,
       }))
@@ -1421,42 +1411,39 @@ function initBirdHealthCharts() {
     }
   }
 
-  // Pre-mortality grids
-  function buildGrid(id, side) {
+  // Pre-mortality grid — 12 pens
+  function buildGrid(id, idxs) {
     const g = document.getElementById(id);
-    for (let col=0;col<6;col++) {
-      for (let row=0;row<4;row++) {
-        const idx = side*24 + row*6 + col;
-        const d = penData[idx];
-        const isAlert = idx===15;
-        const div = document.createElement('div');
-        div.id = `premort-cell-${idx}`;
-        div.className = 'pen-cell' + (isAlert ? ' monitor' : d.clustering > 0.4 ? ' alert-pen' : '');
-        if (isAlert) {
-          const badge = document.createElement('div');
-          badge.className='monitor-badge'; badge.textContent='MONITOR';
-          div.appendChild(badge);
-        }
-        const label = document.createElement('div');
-        label.className='pen-label';
-        label.textContent=`Z${col+1}R${row+1}`;
-        div.appendChild(label);
-        g.appendChild(div);
+    idxs.forEach(idx => {
+      const d = penData[idx];
+      const isAlert = idx === 3;
+      const div = document.createElement('div');
+      div.id = `premort-cell-${idx}`;
+      div.className = 'pen-cell' + (isAlert ? ' monitor' : d.clustering > 0.4 ? ' alert-pen' : '');
+      if (isAlert) {
+        const badge = document.createElement('div');
+        badge.className='monitor-badge'; badge.textContent='MONITOR';
+        div.appendChild(badge);
       }
-    }
+      const label = document.createElement('div');
+      label.className='pen-label';
+      label.textContent=PEN_LABELS[idx];
+      div.appendChild(label);
+      g.appendChild(div);
+    });
   }
-  buildGrid('premort-grid-left',0);
-  buildGrid('premort-grid-right',1);
+  buildGrid('premort-grid-left',  [0,1,2,3,4,5]);
+  buildGrid('premort-grid-right', [6,7,8,9,10,11]);
 }
 
 // ═══════════════════════════════════════════════
 //  OPS CHARTS & SVG LITTER MAP
 // ═══════════════════════════════════════════════
 function initOpsCharts() {
-  // Litter SVG
+  // Litter SVG — 12 pens, 6 along each side of the central aisle
   const svg = document.getElementById('litter-svg');
-  const VW=640, VH=380, PW=72, PH=57;
-  const leftX=12, rightX=372, aisleX=296, aisleW=48;
+  const VW=640, VH=380, PW=280, PH=57;
+  const leftX=12, rightX=348, aisleX=292, aisleW=56;
   const topY=32, zoneH=PH;
 
   // Background
@@ -1464,12 +1451,6 @@ function initOpsCharts() {
   // Aisle
   svg.innerHTML += `<rect x="${aisleX}" y="${topY}" width="${aisleW}" height="${6*zoneH}" fill="#151e2a" rx="2"/>`;
   svg.innerHTML += `<text x="${aisleX+aisleW/2}" y="${topY + 3*zoneH}" dominant-baseline="middle" text-anchor="middle" fill="#2a3860" font-size="9" font-family="DM Sans" transform="rotate(-90,${aisleX+aisleW/2},${topY+3*zoneH})">CENTRAL AISLE</text>`;
-
-  // Zone labels top
-  for (let col=0; col<6; col++) {
-    const lx = leftX + 4*PW/2;
-    svg.innerHTML += `<text x="${leftX + 4*PW/2}" y="${topY + col*zoneH + zoneH/2}" dominant-baseline="middle" text-anchor="middle" fill="#384060" font-size="8" font-family="DM Sans">Z${col+1}</text>`;
-  }
 
   function litColor(v) {
     if (v < 0.35) {
@@ -1481,48 +1462,26 @@ function initOpsCharts() {
   }
   function fpdRisk(v) { return (v * 10).toFixed(1); }
 
-  // Left pens
-  for (let col=0; col<6; col++) {
-    for (let row=0; row<4; row++) {
-      const idx = row*6+col;
-      const d = penData[idx];
-      const x = leftX + row*PW;
-      const y = topY + col*zoneH;
-      const color = litColor(d.litter);
-      const risk  = parseFloat(fpdRisk(d.litter));
-      const stroke = risk > 5 ? '#f03050' : '#1c2540';
-      svg.innerHTML += `<rect id="svg-pen-${idx}" x="${x+1}" y="${y+1}" width="${PW-2}" height="${zoneH-2}" fill="${color}" stroke="${stroke}" stroke-width="${risk>5?1.5:0.5}" rx="2"/>`;
-      if (risk > 5) {
-        svg.innerHTML += `<text x="${x+PW/2}" y="${y+zoneH/2-5}" dominant-baseline="middle" text-anchor="middle" fill="#f03050" font-size="11" font-family="IBM Plex Mono" font-weight="600">${risk.toFixed(1)}</text>`;
-        svg.innerHTML += `<text x="${x+PW/2}" y="${y+zoneH/2+7}" dominant-baseline="middle" text-anchor="middle" fill="#f03050" font-size="8" font-family="DM Sans">FPD risk</text>`;
-      }
+  function drawPen(idx, x, y) {
+    const d = penData[idx];
+    const color = litColor(d.litter);
+    const risk  = parseFloat(fpdRisk(d.litter));
+    const stroke = risk > 5 ? '#f03050' : '#1c2540';
+    svg.innerHTML += `<rect id="svg-pen-${idx}" x="${x+1}" y="${y+1}" width="${PW-2}" height="${zoneH-2}" fill="${color}" stroke="${stroke}" stroke-width="${risk>5?1.5:0.5}" rx="2"/>`;
+    svg.innerHTML += `<text x="${x+8}" y="${y+14}" dominant-baseline="middle" fill="#384060" font-size="9" font-family="DM Sans">${PEN_LABELS[idx]}</text>`;
+    if (risk > 5) {
+      svg.innerHTML += `<text x="${x+PW/2}" y="${y+zoneH/2+5}" dominant-baseline="middle" text-anchor="middle" fill="#f03050" font-size="11" font-family="IBM Plex Mono" font-weight="600">${risk.toFixed(1)}</text>`;
+      svg.innerHTML += `<text x="${x+PW/2}" y="${y+zoneH/2+17}" dominant-baseline="middle" text-anchor="middle" fill="#f03050" font-size="8" font-family="DM Sans">FPD risk</text>`;
     }
   }
-  // Right pens
-  for (let col=0; col<6; col++) {
-    for (let row=0; row<4; row++) {
-      const idx = 24 + row*6+col;
-      const d = penData[idx];
-      const x = rightX + row*PW;
-      const y = topY + col*zoneH;
-      const color = litColor(d.litter);
-      const risk  = parseFloat(fpdRisk(d.litter));
-      const stroke = risk > 5 ? '#f03050' : '#1c2540';
-      svg.innerHTML += `<rect id="svg-pen-${idx}" x="${x+1}" y="${y+1}" width="${PW-2}" height="${zoneH-2}" fill="${color}" stroke="${stroke}" stroke-width="${risk>5?1.5:0.5}" rx="2"/>`;
-      if (risk > 5) {
-        svg.innerHTML += `<text x="${x+PW/2}" y="${y+zoneH/2-5}" dominant-baseline="middle" text-anchor="middle" fill="#f03050" font-size="11" font-family="IBM Plex Mono" font-weight="600">${risk.toFixed(1)}</text>`;
-        svg.innerHTML += `<text x="${x+PW/2}" y="${y+zoneH/2+7}" dominant-baseline="middle" text-anchor="middle" fill="#f03050" font-size="8" font-family="DM Sans">FPD risk</text>`;
-      }
-    }
-  }
-  // Column labels (zone numbers on left)
-  for (let col=0; col<6; col++) {
-    svg.innerHTML += `<text x="4" y="${topY + col*zoneH + zoneH/2}" dominant-baseline="middle" fill="#384060" font-size="9" font-family="DM Sans">Z${col+1}</text>`;
-    svg.innerHTML += `<text x="${VW-5}" y="${topY + col*zoneH + zoneH/2}" dominant-baseline="middle" text-anchor="end" fill="#384060" font-size="9" font-family="DM Sans">Z${col+1}</text>`;
-  }
+  // Left pens (Pen 1–6)
+  for (let col=0; col<6; col++) drawPen(col, leftX, topY + col*zoneH);
+  // Right pens (Pen 7–12)
+  for (let col=0; col<6; col++) drawPen(6+col, rightX, topY + col*zoneH);
+
   // Side labels
-  svg.innerHTML += `<text x="${leftX+2*PW}" y="${topY-10}" text-anchor="middle" fill="#384060" font-size="10" font-family="DM Sans" letter-spacing="1">LEFT SIDE</text>`;
-  svg.innerHTML += `<text x="${rightX+2*PW}" y="${topY-10}" text-anchor="middle" fill="#384060" font-size="10" font-family="DM Sans" letter-spacing="1">RIGHT SIDE</text>`;
+  svg.innerHTML += `<text x="${leftX+PW/2}" y="${topY-10}" text-anchor="middle" fill="#384060" font-size="10" font-family="DM Sans" letter-spacing="1">LEFT SIDE</text>`;
+  svg.innerHTML += `<text x="${rightX+PW/2}" y="${topY-10}" text-anchor="middle" fill="#384060" font-size="10" font-family="DM Sans" letter-spacing="1">RIGHT SIDE</text>`;
 
   // T+RH Chart
   const labels48 = [];
@@ -1551,11 +1510,11 @@ function initOpsCharts() {
     data: {
       labels: labels48,
       datasets: [
-        { label:'Zone 1 Temp', data:tZ1, borderColor:'#4080ff', borderWidth:1.5, fill:false, tension:0.4, yAxisID:'temp', pointRadius:0 },
-        { label:'Zone 2 Temp', data:tZ2, borderColor:'#28d472', borderWidth:1.5, fill:false, tension:0.4, yAxisID:'temp', pointRadius:0 },
-        { label:'Zone 4 Temp', data:tZ4, borderColor:'#f03050', borderWidth:2,   fill:false, tension:0.4, yAxisID:'temp', pointRadius:0 },
-        { label:'Zone 2 RH',   data:hZ2, borderColor:'#e8930a', borderDash:[4,2], borderWidth:1.5, fill:false, tension:0.4, yAxisID:'humid', pointRadius:0 },
-        { label:'Zone 4 RH',   data:hZ4, borderColor:'#9050ff', borderDash:[4,2], borderWidth:1.5, fill:false, tension:0.4, yAxisID:'humid', pointRadius:0 },
+        { label:'Pen 1 Temp', data:tZ1, borderColor:'#4080ff', borderWidth:1.5, fill:false, tension:0.4, yAxisID:'temp', pointRadius:0 },
+        { label:'Pen 8 Temp', data:tZ2, borderColor:'#28d472', borderWidth:1.5, fill:false, tension:0.4, yAxisID:'temp', pointRadius:0 },
+        { label:'Pen 4 Temp', data:tZ4, borderColor:'#f03050', borderWidth:2,   fill:false, tension:0.4, yAxisID:'temp', pointRadius:0 },
+        { label:'Pen 8 RH',   data:hZ2, borderColor:'#e8930a', borderDash:[4,2], borderWidth:1.5, fill:false, tension:0.4, yAxisID:'humid', pointRadius:0 },
+        { label:'Pen 4 RH',   data:hZ4, borderColor:'#9050ff', borderDash:[4,2], borderWidth:1.5, fill:false, tension:0.4, yAxisID:'humid', pointRadius:0 },
       ]
     },
     options: {
@@ -1578,28 +1537,28 @@ function initOpsCharts() {
 //  AI CHAT — MAIN TAB
 // ═══════════════════════════════════════════════
 const aiResponses = {
-  fpd: `Based on current backscatter readings, footpad dermatitis risk scores across all zones:\n\nZone 2R: 6.2 / 10 — WARNING. Sustained litter saturation for 3+ days. Intervention recommended within 24h.\nZone 4L: 4.8 / 10 — WATCH. Combined with clustering alert, risk trajectory is concerning.\nAll other zones: 1.2 – 3.4 — within acceptable range for Day 18.\n\nFPD risk scores are updated every 10 minutes. Next assessment: 18:10.`,
-  compare: `Comparing Zone 4L activity at Day 18 across last 4 flocks:\n\nFlock 9 (current):  48  ← BELOW HISTORICAL MINIMUM\nFlock 8:            79  (normal)\nFlock 7:            82  (normal)\nFlock 6:            74  (normal)\n\nThe current reading is 37% below the 3-flock average of 78.3. This is the lowest recorded Day 18 activity for Zone 4L in the PRF Shed A dataset. Historical precedent strongly suggests an active health event.`,
-  avoidance: `Three avoidance zones detected in last 24h:\n\nZone 5R Row 2 — Density 28% below baseline (04:00–07:00). RESOLVED after feeder inspection.\nZone 1L Row 4 — Mild density deficit (-18%) throughout afternoon. Possible heat stress from solar exposure.\nZone 6R Row 1 — Persistent low density correlated with elevated temperature (32.7°C). Birds avoiding hot zone.\n\nAvoidance detection threshold: >25% below per-zone average density for >30 minutes.`,
-  report: `WEEKLY RESEARCH LOG SUMMARY — PRF Shed A — Flock Day 18\nDate: June 6, 2026\n\nFLOCK STATUS: CONCERN — Active health event Zone 4L\nAVG ACTIVITY: 84/100 (6-zone mean) | Zone 4L: 48 ⚠\nLITTER CONDITION: 78% friable / 16% saturated / 6% caked\nWEIGHT PROXY: ~905g vs Ross 308 standard 890g (+1.7%)\nTEMP RANGE: 28.1°C – 32.7°C | Zone 6R approaching limit\n\nALERTS THIS WEEK: 7 total (2 critical, 3 warning, 2 info)\nFPD RISK ZONES: 2R (6.2/10), 4L (4.8/10)\n\nACTION ITEMS: (1) Zone 4L walkthrough — urgent (2) Drinker inspection Zone 2R (3) Ventilation check Zone 6R`,
-  default: `I don't have a specific pre-loaded answer for that question, but in a real deployment I would query the live sensor database and return zone-specific data with full trend analysis. Try one of the suggested questions on the right for a detailed response.`
+  fpd: `Based on current backscatter readings, footpad dermatitis risk scores across all pens:\n\nPen 8: 6.2 / 10 — WARNING. Sustained litter saturation for 3+ days. Intervention recommended within 24h.\nPen 4: 4.8 / 10 — WATCH. Combined with clustering alert, risk trajectory is concerning.\nAll other pens: 1.2 – 3.4 — within acceptable range for Day 18.\n\nFPD risk scores are updated every 10 minutes. Next assessment: 18:10.`,
+  compare: `Comparing Pen 4 activity at Day 18 across last 4 flocks:\n\nFlock 9 (current):  48  ← BELOW HISTORICAL MINIMUM\nFlock 8:            79  (normal)\nFlock 7:            82  (normal)\nFlock 6:            74  (normal)\n\nThe current reading is 37% below the 3-flock average of 78.3. This is the lowest recorded Day 18 activity for Pen 4 in the PRF Shed A dataset. Historical precedent strongly suggests an active health event.`,
+  avoidance: `Three pens with avoidance behaviour detected in last 24h:\n\nPen 11 — Density 28% below baseline (04:00–07:00). RESOLVED after feeder inspection.\nPen 1 — Mild density deficit (-18%) throughout afternoon. Possible heat stress from solar exposure.\nPen 12 — Persistent low density correlated with elevated temperature (32.7°C). Birds avoiding hot area.\n\nAvoidance detection threshold: >25% below per-pen average density for >30 minutes.`,
+  report: `WEEKLY RESEARCH LOG SUMMARY — PRF Shed A — Flock Day 18\nDate: June 6, 2026\n\nFLOCK STATUS: CONCERN — Active health event Pen 4\nAVG ACTIVITY: 84/100 (12-pen mean) | Pen 4: 48 ⚠\nLITTER CONDITION: 78% friable / 16% saturated / 6% caked\nWEIGHT PROXY: ~905g vs Ross 308 standard 890g (+1.7%)\nTEMP RANGE: 28.1°C – 32.7°C | Pen 12 approaching limit\n\nALERTS THIS WEEK: 7 total (2 critical, 3 warning, 2 info)\nFPD RISK PENS: Pen 8 (6.2/10), Pen 4 (4.8/10)\n\nACTION ITEMS: (1) Pen 4 walkthrough — urgent (2) Drinker inspection Pen 8 (3) Ventilation check Pen 12`,
+  default: `I don't have a specific pre-loaded answer for that question, but in a real deployment I would query the live sensor database and return pen-specific data with full trend analysis. Try one of the suggested questions on the right for a detailed response.`
 };
 
 function getRealModeResponse(q) {
   const d = penData[DEPLOYED_PEN_IDXS[0]];
   if (q.includes('alert')) {
-    return 'No active alerts. Live sensor data from Node 1 (Zone 3L) is within nominal range.';
+    return 'No active alerts. Live sensor data from Node 1 (Pen 3) is within nominal range.';
   }
   if (q.includes('cluster')) {
-    return `Current clustering intensity in Zone 3L (Node 1): ${d.clustering.toFixed(2)}. ${d.clustering > 0.4 ? 'This is elevated — worth monitoring.' : 'This is within the normal range.'}`;
+    return `Current clustering intensity in Pen 3 (Node 1): ${d.clustering.toFixed(2)}. ${d.clustering > 0.4 ? 'This is elevated — worth monitoring.' : 'This is within the normal range.'}`;
   }
   if (q.includes('temp') || q.includes('humid')) {
-    return `Zone 3L (Node 1) live readings — Temperature: ${d.temp.toFixed(1)}°C, Humidity: ${d.humidity.toFixed(0)}%.`;
+    return `Pen 3 (Node 1) live readings — Temperature: ${d.temp.toFixed(1)}°C, Humidity: ${d.humidity.toFixed(0)}%.`;
   }
   if (q.includes('activity')) {
-    return `Zone 3L (Node 1) current activity index: ${Math.round(d.activity)}/100, based on live mmWave readings.`;
+    return `Pen 3 (Node 1) current activity index: ${Math.round(d.activity)}/100, based on live mmWave readings.`;
   }
-  return `I currently only have live data from Node 1 (Zone 3L): activity ${Math.round(d.activity)}/100, clustering ${d.clustering.toFixed(2)}, temperature ${d.temp.toFixed(1)}°C, humidity ${d.humidity.toFixed(0)}%. Other zones have no deployed sensors yet.`;
+  return `I currently only have live data from Node 1 (Pen 3): activity ${Math.round(d.activity)}/100, clustering ${d.clustering.toFixed(2)}, temperature ${d.temp.toFixed(1)}°C, humidity ${d.humidity.toFixed(0)}%. Other pens have no deployed sensors yet.`;
 }
 
 function getAIResponse(q) {
@@ -1658,9 +1617,9 @@ document.getElementById('afp-close').addEventListener('click', () => floatPanel.
 bubble.addEventListener('click', () => floatPanel.classList.toggle('open'));
 
 const afpResponses = {
-  'current flock status?': 'All metrics nominal except Zone 4L (activity 48 ↓, clustering 0.92) and Zone 2R (litter index 0.72). 3 active alerts. Flock weight +1.7% above breed standard.',
-  'any urgent alerts?': '1 CRITICAL: Zone 4L clustering detected at 11:42 (intensity 0.92). Walkthrough recommended urgently.\n2 WARNINGS: Zone 2R litter saturation (FPD risk 6.2) · Zone 6R temperature 32.7°C.',
-  "today's weight estimate?": 'Current flock weight estimate: ~905g average across all 48 pens. Ross 308 standard at Day 18: 890g. You are +1.7% above breed curve — on track.',
+  'current flock status?': 'All metrics nominal except Pen 4 (activity 48 ↓, clustering 0.92) and Pen 8 (litter index 0.72). 3 active alerts. Flock weight +1.7% above breed standard.',
+  'any urgent alerts?': '1 CRITICAL: Pen 4 clustering detected at 11:42 (intensity 0.92). Walkthrough recommended urgently.\n2 WARNINGS: Pen 8 litter saturation (FPD risk 6.2) · Pen 12 temperature 32.7°C.',
+  "today's weight estimate?": 'Current flock weight estimate: ~905g average across all 12 pens. Ross 308 standard at Day 18: 890g. You are +1.7% above breed curve — on track.',
 };
 
 function appendFloat(role, text) {
@@ -1715,8 +1674,8 @@ document.getElementById('afp-input').addEventListener('keydown', e => {
 //  LIVE DATA — FlockSense API
 // ═══════════════════════════════════════════════
 // Maps real RPi node IDs to pen indices in the 3D shed model.
-// Node 1 covers all 4 row-pens of Zone 3L (col=2, side=L): idx = row*6 + 2
-const LIVE_NODE_PEN_MAP = { node1: [2, 8, 14, 20] };
+// Node 1 is deployed in Pen 3 (idx 2)
+const LIVE_NODE_PEN_MAP = { node1: [2] };
 
 // Backend API — same FastAPI service that ingests RPi sensor readings.
 const API_BASE = 'https://flocksense-api-production.up.railway.app';
@@ -1804,7 +1763,7 @@ function refreshSidebar() {
 
   let label;
   if (isAll) {
-    label = window.REAL_MODE ? 'Zone 3L · Node 1 · live' : 'Avg across 48 pens · updated 60s';
+    label = window.REAL_MODE ? 'Pen 3 · Node 1 · live' : 'Avg across 12 pens · updated 60s';
   } else {
     const hasSensor = DEPLOYED_PEN_IDXS.includes(idx);
     label = PEN_LABELS[idx] + (hasSensor ? ' · Node 1 · live' : (window.REAL_MODE ? ' · No sensor deployed' : ''));
@@ -1832,7 +1791,7 @@ function renderAlertsCard(isAll, idx) {
     const monitored = isAll || DEPLOYED_PEN_IDXS.includes(idx);
     card.style.borderColor = 'var(--border)';
     body.innerHTML = monitored
-      ? `<div class="alerts-count" style="color:var(--green)">0</div><div class="kpi-sub" style="margin-top:6px;">No active alerts · monitoring Zone 3L (Node 1)</div>`
+      ? `<div class="alerts-count" style="color:var(--green)">0</div><div class="kpi-sub" style="margin-top:6px;">No active alerts · monitoring Pen 3 (Node 1)</div>`
       : `<div class="alerts-count" style="color:var(--text-3)">—</div><div class="kpi-sub" style="margin-top:6px;">No sensor deployed for this pen</div>`;
     return;
   }
