@@ -137,6 +137,16 @@ body.real-mode .real-only.grid{display:grid;}
 .t-marker.info{background:var(--blue);box-shadow:0 0 6px var(--blue);}
 .timeline-time{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--cyan);width:42px;flex-shrink:0;}
 .timeline-label{font-size:10px;color:var(--text-3);letter-spacing:.4px;}
+.speed-control{gap:2px;flex-shrink:0;}
+.speed-btn{background:var(--bg-s2);border:1px solid var(--border);color:var(--text-2);font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:4px 7px;border-radius:3px;cursor:pointer;transition:all .15s;}
+.speed-btn:hover{border-color:var(--border-hi);color:var(--text);}
+.speed-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,200,224,.1);}
+.live-btn{align-items:center;gap:6px;background:var(--bg-s2);border:1px solid var(--border-hi);color:var(--text-2);font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:5px 10px;border-radius:4px;cursor:pointer;letter-spacing:.5px;white-space:nowrap;flex-shrink:0;transition:all .15s;}
+.live-btn:hover{color:var(--text);}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--text-3);flex-shrink:0;}
+.live-btn.active{border-color:var(--green);color:var(--green);}
+.live-btn.active .live-dot{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse-live 1.5s infinite;}
+@keyframes pulse-live{0%,100%{opacity:1;}50%{opacity:.25;}}
 
 /* ── ALERTS ── */
 .alerts-wrap{height:88px;border-top:1px solid var(--border);display:flex;gap:10px;padding:10px 14px;background:rgba(9,12,20,.8);flex-shrink:0;overflow-x:auto;}
@@ -412,6 +422,12 @@ body.real-mode .real-only.grid{display:grid;}
   <div class="timeline-wrap">
     <span class="timeline-label" style="white-space:nowrap">00:00</span>
     <button class="play-btn" id="play-btn">▶</button>
+    <div class="speed-control real-only" id="speed-control">
+      <button class="speed-btn active" data-speed="1">1×</button>
+      <button class="speed-btn" data-speed="2">2×</button>
+      <button class="speed-btn" data-speed="4">4×</button>
+      <button class="speed-btn" data-speed="8">8×</button>
+    </div>
     <div class="timeline-track">
       <div class="timeline-events demo-only">
         <div class="t-marker warning" style="left:29.2%" title="07:00 — Litter moisture rising Zone 2R"></div>
@@ -422,6 +438,7 @@ body.real-mode .real-only.grid{display:grid;}
     </div>
     <span class="timeline-label" style="white-space:nowrap">23:59</span>
     <span class="timeline-time" id="timeline-time">18:00</span>
+    <button class="live-btn real-only" id="live-btn"><span class="live-dot"></span>LIVE</button>
   </div>
 
   <!-- ALERTS -->
@@ -1175,29 +1192,125 @@ const sparkData = sparkActivity;
 const tlRange = document.getElementById('timeline-range');
 const tlTime  = document.getElementById('timeline-time');
 const playBtn = document.getElementById('play-btn');
+const liveBtn = document.getElementById('live-btn');
+const speedBtns = document.querySelectorAll('.speed-btn');
 let playing = false, playInterval = null;
+let playSpeed = 1;
+let liveMode = true;
+let historyData = []; // [{ts, activity_score, clustering_score, temperature, humidity}, ...]
 
 function tlToTime(v) {
-  const mins = Math.round(v / 100 * 1440);
+  const mins = Math.round(v / 100 * 1439);
   return String(Math.floor(mins/60)).padStart(2,'0') + ':' + String(mins%60).padStart(2,'0');
 }
-tlRange.addEventListener('input', () => { tlTime.textContent = tlToTime(tlRange.value); });
+
+// Maps a 0-100 slider value to a Date within "today" (00:00 -> 23:59).
+function sliderToDate(v) {
+  const start = new Date(); start.setHours(0,0,0,0);
+  return new Date(start.getTime() + (v/100*1439)*60000);
+}
+
+// Maps the current time-of-day to a 0-100 slider value.
+function nowSliderValue() {
+  const now = new Date();
+  return Math.min(100, (now.getHours()*60 + now.getMinutes()) / 1439 * 100);
+}
+
 tlTime.textContent = tlToTime(tlRange.value);
 
-playBtn.addEventListener('click', () => {
+// ── Real-mode history (for scrubbing/playback) ──
+async function loadHistory() {
+  try {
+    const res = await fetch(`${API_BASE}/api/pens/history?node_id=node1&hours=24`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    historyData = rows.map(r => ({ ...r, ts: new Date(r.timestamp) }));
+  } catch (e) {
+    console.warn('[history] fetch failed', e);
+  }
+}
+
+function nearestHistory(date) {
+  if (!historyData.length) return null;
+  let best = historyData[0], bestDiff = Math.abs(historyData[0].ts - date);
+  for (const p of historyData) {
+    const diff = Math.abs(p.ts - date);
+    if (diff < bestDiff) { best = p; bestDiff = diff; }
+  }
+  return best;
+}
+
+// Updates Zone 3L pen data, KPIs, 3D model and camera frame for the given time.
+function applyScrub(date) {
+  const p = nearestHistory(date);
+  if (p) {
+    DEPLOYED_PEN_IDXS.forEach(idx => {
+      const d = penData[idx];
+      if (!d) return;
+      if (p.activity_score != null) d.activity = p.activity_score;
+      if (p.clustering_score != null) d.clustering = p.clustering_score;
+      if (p.temperature != null) d.temp = p.temperature;
+      if (p.humidity != null) d.humidity = p.humidity;
+    });
+    updateRealModeKPIs();
+    if (typeof window.updateLayer === 'function') {
+      const activeBtn = document.querySelector('.layer-btn.active');
+      window.updateLayer(activeBtn ? activeBtn.dataset.layer : 'activity');
+    }
+  }
+  const img = document.getElementById('camera-node1');
+  if (img) img.src = `${API_BASE}/api/camera/image?node_id=node1&timestamp=${date.toISOString()}`;
+}
+
+function setLiveMode(on) {
+  liveMode = on;
+  if (liveBtn) liveBtn.classList.toggle('active', on);
+  if (on) {
+    if (playing) togglePlay();
+    tlRange.value = nowSliderValue();
+    tlTime.textContent = tlToTime(tlRange.value);
+    if (window.REAL_MODE) fetchLiveData();
+  }
+}
+if (liveBtn) liveBtn.addEventListener('click', () => setLiveMode(true));
+
+speedBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    playSpeed = parseFloat(btn.dataset.speed);
+    speedBtns.forEach(b => b.classList.toggle('active', b === btn));
+  });
+});
+
+tlRange.addEventListener('input', () => {
+  tlTime.textContent = tlToTime(tlRange.value);
+  if (window.REAL_MODE) {
+    setLiveMode(false);
+    applyScrub(sliderToDate(tlRange.value));
+  }
+});
+
+function togglePlay() {
   playing = !playing;
   playBtn.textContent = playing ? '⏸' : '▶';
   if (playing) {
+    if (window.REAL_MODE) setLiveMode(false);
     playInterval = setInterval(() => {
-      const v = parseInt(tlRange.value);
-      if (v >= 100) { playing=false; playBtn.textContent='▶'; clearInterval(playInterval); return; }
-      tlRange.value = v + 1;
-      tlTime.textContent = tlToTime(tlRange.value);
+      const limit = window.REAL_MODE ? nowSliderValue() : 100;
+      const step = window.REAL_MODE ? 0.1 * playSpeed : 1;
+      let v = parseFloat(tlRange.value) + step;
+      if (v >= limit) {
+        v = limit;
+        playing = false; playBtn.textContent = '▶'; clearInterval(playInterval);
+      }
+      tlRange.value = v;
+      tlTime.textContent = tlToTime(v);
+      if (window.REAL_MODE) applyScrub(sliderToDate(v));
     }, 80);
   } else {
     clearInterval(playInterval);
   }
-});
+}
+playBtn.addEventListener('click', togglePlay);
 
 // ═══════════════════════════════════════════════
 //  BIRD HEALTH CHARTS
@@ -1619,7 +1732,7 @@ async function fetchLiveData() {
 
       const img = document.getElementById('camera-' + row.node_id);
       if (img && row.camera_url) {
-        img.src = row.camera_url + '?t=' + Date.now();
+        img.src = `${API_BASE}/api/camera/image?node_id=${row.node_id}&t=${Date.now()}`;
       }
     });
 
@@ -1628,6 +1741,11 @@ async function fetchLiveData() {
       window.updateLayer(activeBtn ? activeBtn.dataset.layer : 'activity');
     }
     updateRealModeKPIs();
+
+    if (window.REAL_MODE && liveMode) {
+      tlRange.value = nowSliderValue();
+      tlTime.textContent = tlToTime(tlRange.value);
+    }
   } catch (e) {
     console.warn('[live data] fetch failed', e);
   }
@@ -1664,6 +1782,11 @@ function applyMode(mode) {
   }
 
   updateRealModeKPIs();
+
+  if (real) {
+    loadHistory();
+    setLiveMode(true);
+  }
 }
 
 document.getElementById('mode-switch').addEventListener('click', () => {
@@ -1683,6 +1806,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   fetchLiveData();
   setInterval(fetchLiveData, 10000);
+  setInterval(loadHistory, 60000);
 });
 </script>
 </body>
