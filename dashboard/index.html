@@ -61,6 +61,7 @@ body.real-mode .real-only.grid{display:grid;}
 .real-placeholder .rp-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);}
 .real-placeholder .rp-sub{font-size:12px;max-width:420px;line-height:1.6;}
 .shed-select{background:var(--bg-s2);border:1px solid var(--border-hi);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 10px;border-radius:4px;cursor:pointer;outline:none;}
+.pen-select{width:100%;background:var(--bg-s2);border:1px solid var(--border-hi);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:7px 10px;border-radius:4px;cursor:pointer;outline:none;}
 .flock-badge{background:rgba(0,200,224,.12);border:1px solid rgba(0,200,224,.3);color:var(--cyan);font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;letter-spacing:.5px;}
 .nav-clock{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-2);letter-spacing:.5px;}
 
@@ -338,13 +339,20 @@ body.real-mode .real-only.grid{display:grid;}
     </div>
     <div class="kpi-sidebar">
 
-      <!-- Live Camera Feeds -->
-      <div class="kpi-card">
-        <div class="kpi-label">Live Camera Feeds</div>
+      <!-- Pen selector -->
+      <div class="kpi-card" style="padding:10px 13px;">
+        <select class="pen-select" id="pen-select">
+          <option value="all">All Pens — Shed Overview</option>
+        </select>
+      </div>
+
+      <!-- Live Camera Feed -->
+      <div class="kpi-card" id="camera-card">
+        <div class="kpi-label" id="camera-label">Live Camera Feed</div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
           <div>
-            <div style="font-size:10px;color:var(--text-2);margin-bottom:3px;">Node 1 — Zone 3L</div>
             <img id="camera-node1" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;border:1px solid var(--border);background:var(--bg-s2);">
+            <div class="kpi-sub" id="camera-no-sensor" style="display:none;padding:14px 0;text-align:center;">No camera deployed for this pen</div>
           </div>
         </div>
       </div>
@@ -356,13 +364,12 @@ body.real-mode .real-only.grid{display:grid;}
           <div class="kpi-value" id="kpi-activity-value" style="color:var(--green)">84</div>
           <span class="kpi-trend trend-up demo-only">↑ +3</span>
         </div>
-        <div class="kpi-sub demo-only">Avg across 48 pens · updated 60s</div>
-        <div class="kpi-sub real-only">Zone 3L · Node 1 · live</div>
+        <div class="kpi-sub" id="kpi-activity-sub">Avg across 48 pens · updated 60s</div>
         <canvas class="kpi-spark demo-only" id="spark-activity" height="28"></canvas>
       </div>
 
       <!-- KPI 2: Litter -->
-      <div class="kpi-card demo-only">
+      <div class="kpi-card demo-only" id="litter-card">
         <div class="kpi-label">Litter Condition</div>
         <div class="donut-wrap">
           <canvas class="donut-canvas" id="donut-litter" width="60" height="60"></canvas>
@@ -378,17 +385,16 @@ body.real-mode .real-only.grid{display:grid;}
       <div class="kpi-card">
         <div class="kpi-label">Shed Temperature</div>
         <div class="range-avg" id="kpi-temp-value">29.4<span style="font-size:16px;font-weight:400;color:var(--text-2)">°C</span></div>
-        <div class="kpi-sub demo-only">Shed average · 12 zones</div>
-        <div class="kpi-sub real-only">Zone 3L · Node 1 · live</div>
-        <div class="range-bar demo-only">
+        <div class="kpi-sub" id="kpi-temp-sub">Shed average · 12 zones</div>
+        <div class="range-bar demo-only" id="temp-range-bar">
           <div class="range-track"><div class="range-fill" style="left:12%;right:18%"></div></div>
           <div class="range-ends"><span>28.1°C</span><span>32.7°C</span></div>
         </div>
-        <div class="kpi-sub real-only" style="margin-top:6px;">Humidity: <span id="kpi-humidity-value" style="font-family:'IBM Plex Mono',monospace;color:var(--text)">—</span></div>
+        <div class="kpi-sub" style="margin-top:6px;">Humidity: <span id="kpi-humidity-value" style="font-family:'IBM Plex Mono',monospace;color:var(--text)">—</span></div>
       </div>
 
       <!-- KPI 4: Weight -->
-      <div class="kpi-card demo-only">
+      <div class="kpi-card demo-only" id="weight-card">
         <div class="kpi-label">Weight Proxy</div>
         <div style="display:flex;align-items:baseline;gap:10px;">
           <div class="kpi-value" style="color:var(--cyan);font-size:30px;">~905<span style="font-size:14px;font-weight:400;color:var(--text-2)">g</span></div>
@@ -398,21 +404,16 @@ body.real-mode .real-only.grid{display:grid;}
       </div>
 
       <!-- KPI 5: Alerts -->
-      <div class="kpi-card demo-only" style="border-color:rgba(240,48,80,.3);">
+      <div class="kpi-card" id="alerts-card" style="border-color:rgba(240,48,80,.3);">
         <div class="kpi-label">Active Alerts</div>
-        <div class="alerts-count">3</div>
-        <div class="alert-breakdown">
-          <div class="ab-item"><div class="ab-dot" style="background:var(--red)"></div><span>1 Critical &mdash; Zone 4L clustering</span></div>
-          <div class="ab-item"><div class="ab-dot" style="background:var(--amber)"></div><span>1 Warning &mdash; Litter Zone 2R</span></div>
-          <div class="ab-item"><div class="ab-dot" style="background:var(--blue)"></div><span>1 Info &mdash; Temp Zone 6R</span></div>
+        <div id="alerts-card-body">
+          <div class="alerts-count">3</div>
+          <div class="alert-breakdown">
+            <div class="ab-item"><div class="ab-dot" style="background:var(--red)"></div><span>1 Critical &mdash; Zone 4L clustering</span></div>
+            <div class="ab-item"><div class="ab-dot" style="background:var(--amber)"></div><span>1 Warning &mdash; Litter Zone 2R</span></div>
+            <div class="ab-item"><div class="ab-dot" style="background:var(--blue)"></div><span>1 Info &mdash; Temp Zone 6R</span></div>
+          </div>
         </div>
-      </div>
-
-      <!-- KPI 5b: Alerts (real mode) -->
-      <div class="kpi-card real-only block">
-        <div class="kpi-label">Active Alerts</div>
-        <div class="alerts-count" style="color:var(--green)">0</div>
-        <div class="kpi-sub" style="margin-top:6px;">No active alerts · monitoring Zone 3L (Node 1)</div>
       </div>
 
     </div>
@@ -793,6 +794,16 @@ penData[29].temp = 32.7;
 // Some additional subtle variation
 penData[9].litter  = 0.48;
 penData[38].clustering = 0.42;
+
+// Human-readable label for each pen, e.g. "Zone 3L — Row 2"
+const PEN_LABELS = penData.map(d => `Zone ${d.col + 1}${d.side === 0 ? 'L' : 'R'} — Row ${d.row + 1}`);
+
+// Demo-mode alert definitions, mapped to the pens they reference.
+const ALERT_DEFS = [
+  { idx: 15, level: 'critical', label: 'Critical', text: 'Abnormal clustering detected', dot: 'var(--red)' },
+  { idx: 31, level: 'warning',  label: 'Warning',  text: 'Litter saturation rising',     dot: 'var(--amber)' },
+  { idx: 29, level: 'info',     label: 'Info',     text: 'Temperature near upper limit', dot: 'var(--blue)' },
+];
 
 // ═══════════════════════════════════════════════
 //  CLOCK
@@ -1252,7 +1263,7 @@ function applyScrub(date) {
       if (p.temperature != null) d.temp = p.temperature;
       if (p.humidity != null) d.humidity = p.humidity;
     });
-    updateRealModeKPIs();
+    refreshSidebar();
     if (typeof window.updateLayer === 'function') {
       const activeBtn = document.querySelector('.layer-btn.active');
       window.updateLayer(activeBtn ? activeBtn.dataset.layer : 'activity');
@@ -1740,7 +1751,7 @@ async function fetchLiveData() {
       const activeBtn = document.querySelector('.layer-btn.active');
       window.updateLayer(activeBtn ? activeBtn.dataset.layer : 'activity');
     }
-    updateRealModeKPIs();
+    refreshSidebar();
 
     if (window.REAL_MODE && liveMode) {
       tlRange.value = nowSliderValue();
@@ -1752,17 +1763,109 @@ async function fetchLiveData() {
 }
 
 // ═══════════════════════════════════════════════
-//  DUMMY / REAL MODE TOGGLE
+//  KPI SIDEBAR — pen selector
 // ═══════════════════════════════════════════════
-function updateRealModeKPIs() {
-  if (!window.REAL_MODE) return;
-  const d = penData[DEPLOYED_PEN_IDXS[0]];
+let selectedPen = 'all';
+
+function populatePenSelect() {
+  const sel = document.getElementById('pen-select');
+  PEN_LABELS.forEach((label, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = label;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', () => {
+    selectedPen = sel.value;
+    refreshSidebar();
+  });
+}
+
+function getAggregateStats() {
+  const idxs = window.REAL_MODE ? DEPLOYED_PEN_IDXS : penData.map((_, i) => i);
+  let sumA = 0, sumT = 0, sumH = 0;
+  idxs.forEach(i => { sumA += penData[i].activity; sumT += penData[i].temp; sumH += penData[i].humidity; });
+  return { activity: sumA / idxs.length, temp: sumT / idxs.length, humidity: sumH / idxs.length };
+}
+
+// Refreshes the entire right-hand KPI sidebar for the currently selected pen
+// (or the shed-wide aggregate if "All Pens" is selected).
+function refreshSidebar() {
+  const isAll = selectedPen === 'all';
+  const idx = isAll ? null : parseInt(selectedPen, 10);
+  const stats = isAll ? getAggregateStats() : penData[idx];
+
   const actEl = document.getElementById('kpi-activity-value');
-  if (actEl) actEl.textContent = Math.round(d.activity);
+  if (actEl) actEl.textContent = Math.round(stats.activity);
   const tempEl = document.getElementById('kpi-temp-value');
-  if (tempEl) tempEl.innerHTML = d.temp.toFixed(1) + '<span style="font-size:16px;font-weight:400;color:var(--text-2)">°C</span>';
+  if (tempEl) tempEl.innerHTML = stats.temp.toFixed(1) + '<span style="font-size:16px;font-weight:400;color:var(--text-2)">°C</span>';
   const humEl = document.getElementById('kpi-humidity-value');
-  if (humEl) humEl.textContent = d.humidity.toFixed(0) + '%';
+  if (humEl) humEl.textContent = stats.humidity.toFixed(0) + '%';
+
+  let label;
+  if (isAll) {
+    label = window.REAL_MODE ? 'Zone 3L · Node 1 · live' : 'Avg across 48 pens · updated 60s';
+  } else {
+    const hasSensor = DEPLOYED_PEN_IDXS.includes(idx);
+    label = PEN_LABELS[idx] + (hasSensor ? ' · Node 1 · live' : (window.REAL_MODE ? ' · No sensor deployed' : ''));
+  }
+  const actSub = document.getElementById('kpi-activity-sub');
+  if (actSub) actSub.textContent = label;
+  const tempSub = document.getElementById('kpi-temp-sub');
+  if (tempSub) tempSub.textContent = label;
+
+  // Fabricated shed-wide cards (litter, weight, temp range) only make sense in the "All" view
+  ['litter-card', 'weight-card', 'temp-range-bar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isAll ? '' : 'none';
+  });
+
+  renderAlertsCard(isAll, idx);
+  refreshCameraCard(isAll, idx);
+}
+
+function renderAlertsCard(isAll, idx) {
+  const card = document.getElementById('alerts-card');
+  const body = document.getElementById('alerts-card-body');
+
+  if (window.REAL_MODE) {
+    const monitored = isAll || DEPLOYED_PEN_IDXS.includes(idx);
+    card.style.borderColor = 'var(--border)';
+    body.innerHTML = monitored
+      ? `<div class="alerts-count" style="color:var(--green)">0</div><div class="kpi-sub" style="margin-top:6px;">No active alerts · monitoring Zone 3L (Node 1)</div>`
+      : `<div class="alerts-count" style="color:var(--text-3)">—</div><div class="kpi-sub" style="margin-top:6px;">No sensor deployed for this pen</div>`;
+    return;
+  }
+
+  const alerts = isAll ? ALERT_DEFS : ALERT_DEFS.filter(a => a.idx === idx);
+  if (!alerts.length) {
+    card.style.borderColor = 'var(--border)';
+    body.innerHTML = `<div class="alerts-count" style="color:var(--green)">0</div><div class="kpi-sub" style="margin-top:6px;">No active alerts for this pen</div>`;
+    return;
+  }
+  card.style.borderColor = 'rgba(240,48,80,.3)';
+  body.innerHTML = `<div class="alerts-count">${alerts.length}</div><div class="alert-breakdown">` +
+    alerts.map(a => `<div class="ab-item"><div class="ab-dot" style="background:${a.dot}"></div><span>${a.label} &mdash; ${PEN_LABELS[a.idx]}: ${a.text}</span></div>`).join('') +
+    `</div>`;
+}
+
+function refreshCameraCard(isAll, idx) {
+  const card = document.getElementById('camera-card');
+  if (isAll) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  const img = document.getElementById('camera-node1');
+  const noSensor = document.getElementById('camera-no-sensor');
+  document.getElementById('camera-label').textContent = `Live Camera — ${PEN_LABELS[idx]}`;
+  if (DEPLOYED_PEN_IDXS.includes(idx)) {
+    img.style.display = '';
+    noSensor.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    noSensor.style.display = '';
+  }
 }
 
 function applyMode(mode) {
@@ -1781,7 +1884,7 @@ function applyMode(mode) {
     window.updateLayer(activeBtn ? activeBtn.dataset.layer : 'activity');
   }
 
-  updateRealModeKPIs();
+  refreshSidebar();
 
   if (real) {
     loadHistory();
@@ -1802,6 +1905,7 @@ window.addEventListener('DOMContentLoaded', () => {
   drawDonut('donut-litter', [78,16,6], ['#28d472','#d97706','#7c3a0a']);
   tabInitialized['dashboard'] = true;
 
+  populatePenSelect();
   applyMode(localStorage.getItem('flocksense-mode') === 'real' ? 'real' : 'dummy');
 
   fetchLiveData();
