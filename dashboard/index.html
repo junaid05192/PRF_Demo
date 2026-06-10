@@ -288,6 +288,13 @@ body.real-mode .real-only.grid{display:grid;}
 .lightbox-actions{position:absolute;top:18px;right:24px;display:flex;gap:10px;}
 .lightbox-btn{background:rgba(20,26,40,.85);border:1px solid var(--border-hi);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:8px 14px;border-radius:5px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
 .lightbox-btn:hover{background:rgba(40,50,72,.9);border-color:var(--cyan);}
+.lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(20,26,40,.7);border:1px solid var(--border-hi);color:var(--text);font-size:22px;line-height:1;width:46px;height:46px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.lightbox-nav:hover{background:rgba(40,50,72,.9);border-color:var(--cyan);}
+.lightbox-nav:disabled{opacity:.3;cursor:default;}
+.lightbox-nav:disabled:hover{background:rgba(20,26,40,.7);border-color:var(--border-hi);}
+#lightbox-prev{left:24px;}
+#lightbox-next{right:24px;}
+.lightbox-counter{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-2);background:rgba(20,26,40,.7);border:1px solid var(--border-hi);border-radius:4px;padding:4px 10px;}
 </style>
 </head>
 <body>
@@ -736,7 +743,10 @@ Day 18  →  Activity index: 48  ⚠ SIGNIFICANTLY BELOW NORMAL</div>
     <a class="lightbox-btn" id="lightbox-download" download="camera-frame.jpg">Download</a>
     <button class="lightbox-btn" id="lightbox-close">Close ✕</button>
   </div>
+  <button class="lightbox-nav" id="lightbox-prev" aria-label="Previous frame">‹</button>
   <img id="lightbox-img" src="" alt="Camera frame">
+  <button class="lightbox-nav" id="lightbox-next" aria-label="Next frame">›</button>
+  <div class="lightbox-counter" id="lightbox-counter" style="display:none;"></div>
 </div>
 
 <!-- FLOATING AI BUBBLE -->
@@ -1880,17 +1890,67 @@ document.getElementById('mode-switch').addEventListener('click', () => {
   const lightboxImg = document.getElementById('lightbox-img');
   const lightboxDownload = document.getElementById('lightbox-download');
   const closeBtn = document.getElementById('lightbox-close');
+  const prevBtn = document.getElementById('lightbox-prev');
+  const nextBtn = document.getElementById('lightbox-next');
+  const counter = document.getElementById('lightbox-counter');
 
-  function openLightbox(img) {
+  let frames = [];   // list of timestamps, oldest first
+  let frameIdx = -1;
+  let nodeId = null;
+
+  function frameSrc(ts) {
+    return `${API_BASE}/api/camera/image?node_id=${nodeId}&timestamp=${encodeURIComponent(ts)}`;
+  }
+
+  function showFrame(idx) {
+    frameIdx = idx;
+    lightboxImg.src = frameSrc(frames[idx]);
+    lightboxDownload.dataset.src = lightboxImg.src;
+    prevBtn.disabled = idx <= 0;
+    nextBtn.disabled = idx >= frames.length - 1;
+    counter.textContent = `${idx + 1} / ${frames.length} — ${new Date(frames[idx]).toLocaleString()}`;
+  }
+
+  function setNavVisible(visible) {
+    prevBtn.style.display = visible ? '' : 'none';
+    nextBtn.style.display = visible ? '' : 'none';
+    counter.style.display = visible ? '' : 'none';
+  }
+
+  async function openLightbox(img) {
     if (!img.src) return;
+    nodeId = 'node1';
     lightboxImg.src = img.src;
     lightboxDownload.dataset.src = img.src;
+    setNavVisible(false);
     lightbox.classList.add('open');
+
+    try {
+      const res = await fetch(`${API_BASE}/api/camera/frames?node_id=${nodeId}&hours=24&limit=200`);
+      if (!res.ok) return;
+      const rows = await res.json();
+      frames = rows.map(r => r.timestamp);
+      if (frames.length > 1) {
+        setNavVisible(true);
+        showFrame(frames.length - 1);
+      }
+    } catch (e) {
+      console.warn('[lightbox] failed to load frame list', e);
+    }
   }
 
   function closeLightbox() {
     lightbox.classList.remove('open');
     lightboxImg.src = '';
+    frames = [];
+    frameIdx = -1;
+  }
+
+  function navigate(delta) {
+    if (!frames.length) return;
+    const next = frameIdx + delta;
+    if (next < 0 || next >= frames.length) return;
+    showFrame(next);
   }
 
   document.body.addEventListener('click', (e) => {
@@ -1919,12 +1979,18 @@ document.getElementById('mode-switch').addEventListener('click', () => {
     }
   });
 
+  prevBtn.addEventListener('click', () => navigate(-1));
+  nextBtn.addEventListener('click', () => navigate(1));
+
   closeBtn.addEventListener('click', closeLightbox);
   lightbox.addEventListener('click', (e) => {
     if (e.target === lightbox) closeLightbox();
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    else if (e.key === 'ArrowLeft') navigate(-1);
+    else if (e.key === 'ArrowRight') navigate(1);
   });
 })();
 
