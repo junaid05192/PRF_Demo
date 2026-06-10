@@ -1,5 +1,5 @@
 """
-Camera service — captures a frame every 5 seconds and uploads it to the API.
+Camera service — captures a frame every 5 minutes and uploads it to the API.
 
 Uses picamera2 to capture JPEG stills from the Raspberry Pi Camera Module
 (CSI, e.g. imx708) and posts each frame to the API.
@@ -12,7 +12,7 @@ from picamera2 import Picamera2
 
 from common import API_URL, NODE_ID
 
-POST_INTERVAL_SECONDS = 5
+POST_INTERVAL_SECONDS = 300
 FRAME_SIZE = (640, 480)
 
 _picam2 = None
