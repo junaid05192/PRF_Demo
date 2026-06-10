@@ -1,0 +1,16 @@
+[Unit]
+Description=FlockSense camera service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=junaid
+WorkingDirectory=/home/junaid/flocksense-rpi
+EnvironmentFile=/home/junaid/flocksense-rpi/.env
+ExecStart=/home/junaid/flocksense-rpi/.venv/bin/python -u camera_service.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

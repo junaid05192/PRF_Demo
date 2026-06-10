@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlockSense — Project PRF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+:root {
+  --bg: #090c14;
+  --bg-s1: #0f1320;
+  --bg-s2: #141a2a;
+  --bg-s3: #1a2236;
+  --border: #1c2540;
+  --border-hi: #2a3860;
+  --text: #dde2f0;
+  --text-2: #6c7898;
+  --text-3: #384060;
+  --cyan: #00c8e0;
+  --cyan-dim: #005566;
+  --amber: #e8930a;
+  --red: #f03050;
+  --green: #28d472;
+  --blue: #4080ff;
+  --nav-h: 54px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,200,224,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,224,.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+
+/* ── NAV ── */
+nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;background:rgba(9,12,20,.96);border-bottom:1px solid var(--border);position:relative;z-index:200;gap:0;flex-shrink:0;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-.3px;margin-right:32px;white-space:nowrap;}
+.logo span{color:var(--cyan);}
+.logo em{color:var(--text-2);font-style:normal;font-weight:600;}
+.nav-tabs{display:flex;gap:2px;flex:1;}
+.nav-tab{background:none;border:none;color:var(--text-2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:6px 16px;border-radius:4px;cursor:pointer;transition:all .15s;position:relative;}
+.nav-tab:hover{color:var(--text);background:var(--bg-s2);}
+.nav-tab.active{color:var(--cyan);background:rgba(0,200,224,.08);}
+.nav-tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--cyan);border-radius:2px 2px 0 0;}
+.nav-tab.disabled{opacity:.3;cursor:not-allowed;pointer-events:none;}
+.nav-right{display:flex;align-items:center;gap:12px;margin-left:auto;}
+.shed-select{background:var(--bg-s2);border:1px solid var(--border-hi);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 10px;border-radius:4px;cursor:pointer;outline:none;}
+.flock-badge{background:rgba(0,200,224,.12);border:1px solid rgba(0,200,224,.3);color:var(--cyan);font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;letter-spacing:.5px;}
+.nav-clock{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-2);letter-spacing:.5px;}
+
+/* ── TAB PANELS ── */
+.tab-panel{display:none;height:calc(100vh - var(--nav-h));overflow:hidden;position:relative;z-index:1;}
+.tab-panel.active{display:flex;flex-direction:column;}
+
+/* ── DASHBOARD TAB ── */
+.dash-top{display:flex;flex:1;min-height:0;overflow:hidden;}
+.shed-wrap{flex:1;display:flex;flex-direction:column;min-width:0;position:relative;}
+.layer-bar{display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg-s1);flex-shrink:0;}
+.layer-bar-label{font-size:11px;color:var(--text-3);font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-right:6px;}
+.layer-btn{background:var(--bg-s2);border:1px solid var(--border);color:var(--text-2);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;cursor:pointer;transition:all .15s;letter-spacing:.2px;}
+.layer-btn:hover{border-color:var(--border-hi);color:var(--text);}
+.layer-btn.active{background:rgba(0,200,224,.12);border-color:var(--cyan);color:var(--cyan);}
+.layer-btn[data-layer=activity].active{background:rgba(40,212,114,.1);border-color:var(--green);color:var(--green);}
+.layer-btn[data-layer=litter].active{background:rgba(232,147,10,.1);border-color:var(--amber);color:var(--amber);}
+.layer-btn[data-layer=temperature].active{background:rgba(240,48,80,.1);border-color:var(--red);color:var(--red);}
+.layer-btn[data-layer=humidity].active{background:rgba(64,128,255,.1);border-color:var(--blue);color:var(--blue);}
+.layer-btn[data-layer=clustering].active{background:rgba(144,80,255,.1);border-color:#9050ff;color:#9050ff;}
+.layer-btn[data-layer=welfare].active{background:rgba(0,230,180,.1);border-color:#00e6b4;color:#00e6b4;}
+.layer-btn[data-layer=fcr].active{background:rgba(255,180,0,.1);border-color:#ffb400;color:#ffb400;}
+.layer-btn[data-layer=weight].active{background:rgba(180,100,255,.1);border-color:#b464ff;color:#b464ff;}
+.layer-sep{width:1px;height:20px;background:var(--border-hi);margin:0 4px;flex-shrink:0;}
+.beta-badge{font-size:8px;font-weight:700;letter-spacing:.5px;background:rgba(255,180,0,.18);border:1px solid rgba(255,180,0,.4);color:#ffb400;padding:1px 4px;border-radius:2px;margin-left:4px;vertical-align:middle;}
+#shed-container{flex:1;position:relative;min-height:0;cursor:grab;}
+#shed-container:active{cursor:grabbing;}
+#shed-container canvas{display:block;width:100%!important;height:100%!important;}
+.shed-legend{position:absolute;bottom:10px;left:14px;display:flex;flex-direction:column;gap:4px;pointer-events:none;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text-2);}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+.sensor-legend{position:absolute;bottom:10px;right:14px;display:flex;flex-direction:column;gap:5px;pointer-events:none;}
+
+/* ── KPI SIDEBAR ── */
+.kpi-sidebar{width:280px;flex-shrink:0;border-left:1px solid var(--border);background:var(--bg-s1);overflow-y:auto;overflow-x:hidden;padding:10px;height:100%;}
+.kpi-card{background:var(--bg-s2);border:1px solid var(--border);border-radius:6px;padding:11px 13px;position:relative;overflow:hidden;margin-bottom:8px;}
+.kpi-card:last-child{margin-bottom:0;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,224,.4),transparent);}
+.kpi-label{font-size:10px;color:var(--text-2);font-weight:500;letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px;}
+.kpi-value{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;line-height:1;letter-spacing:-1px;}
+.kpi-sub{font-size:11px;color:var(--text-2);margin-top:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.kpi-trend{font-size:11px;font-weight:600;}
+.trend-up{color:var(--green);}
+.trend-down{color:var(--red);}
+.kpi-spark{display:block;width:100%;height:24px;margin-top:6px;}
+.donut-wrap{display:flex;align-items:center;gap:10px;margin-top:4px;}
+.donut-canvas{flex-shrink:0;}
+.donut-legend{display:flex;flex-direction:column;gap:3px;font-size:11px;}
+.donut-item{display:flex;align-items:center;gap:5px;color:var(--text-2);}
+.donut-swatch{width:6px;height:6px;border-radius:2px;flex-shrink:0;}
+.range-bar{margin-top:8px;}
+.range-track{height:4px;background:var(--bg-s3);border-radius:2px;position:relative;margin:4px 0;}
+.range-fill{position:absolute;top:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:2px;}
+.range-ends{display:flex;justify-content:space-between;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--text-2);}
+.range-avg{font-size:26px;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--cyan);}
+.badge-ok{background:rgba(40,212,114,.15);border:1px solid rgba(40,212,114,.3);color:var(--green);font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;letter-spacing:.3px;white-space:nowrap;}
+.badge-warn{background:rgba(232,147,10,.15);border:1px solid rgba(232,147,10,.3);color:var(--amber);font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;white-space:nowrap;}
+.alerts-count{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;color:var(--red);}
+.alert-breakdown{display:flex;flex-direction:column;gap:4px;margin-top:6px;}
+.ab-item{display:flex;align-items:flex-start;gap:6px;font-size:11px;line-height:1.4;}
+.ab-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+
+/* ── TIMELINE ── */
+.timeline-wrap{height:54px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 14px;background:var(--bg-s1);flex-shrink:0;}
+.play-btn{width:28px;height:28px;border-radius:50%;background:var(--bg-s2);border:1px solid var(--border-hi);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;transition:all .15s;}
+.play-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.timeline-track{flex:1;position:relative;height:28px;display:flex;align-items:center;}
+.timeline-range{width:100%;height:3px;-webkit-appearance:none;appearance:none;background:var(--bg-s3);border-radius:2px;outline:none;cursor:pointer;position:relative;z-index:2;}
+.timeline-range::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--cyan);border:2px solid var(--bg);cursor:pointer;box-shadow:0 0 6px var(--cyan);}
+.timeline-events{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:1;}
+.t-marker{position:absolute;width:8px;height:8px;border-radius:50%;top:50%;transform:translate(-50%,-50%);cursor:pointer;}
+.t-marker.critical{background:var(--red);box-shadow:0 0 6px var(--red);}
+.t-marker.warning{background:var(--amber);box-shadow:0 0 6px var(--amber);}
+.t-marker.info{background:var(--blue);box-shadow:0 0 6px var(--blue);}
+.timeline-time{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--cyan);width:42px;flex-shrink:0;}
+.timeline-label{font-size:10px;color:var(--text-3);letter-spacing:.4px;}
+
+/* ── ALERTS ── */
+.alerts-wrap{height:88px;border-top:1px solid var(--border);display:flex;gap:10px;padding:10px 14px;background:rgba(9,12,20,.8);flex-shrink:0;overflow-x:auto;}
+.alert-card{flex:1;min-width:220px;background:var(--bg-s2);border-radius:5px;padding:9px 12px;display:flex;flex-direction:column;gap:4px;border-left:3px solid transparent;position:relative;}
+.alert-card.critical{border-left-color:var(--red);background:rgba(240,48,80,.06);}
+.alert-card.warning{border-left-color:var(--amber);background:rgba(232,147,10,.06);}
+.alert-card.info{border-left-color:var(--blue);background:rgba(64,128,255,.06);}
+.alert-top{display:flex;align-items:center;gap:8px;}
+.alert-badge{font-size:9px;font-weight:700;letter-spacing:.6px;padding:2px 6px;border-radius:2px;}
+.alert-card.critical .alert-badge{background:rgba(240,48,80,.2);color:var(--red);}
+.alert-card.warning .alert-badge{background:rgba(232,147,10,.2);color:var(--amber);}
+.alert-card.info .alert-badge{background:rgba(64,128,255,.2);color:var(--blue);}
+.alert-zone{font-size:11px;font-weight:600;color:var(--text);}
+.alert-time{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-2);margin-left:auto;}
+.alert-msg{font-size:11px;color:var(--text-2);}
+.alert-btn{position:absolute;right:10px;bottom:9px;background:none;border:1px solid var(--border-hi);color:var(--text-2);font-size:10px;padding:2px 8px;border-radius:3px;cursor:pointer;transition:all .15s;}
+.alert-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* ── BIRD HEALTH TAB ── */
+#tab-birdhealth{overflow-y:auto;}
+.bh-layout{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:14px;padding:14px;min-height:100%;}
+.chart-card{background:var(--bg-s1);border:1px solid var(--border);border-radius:6px;padding:16px;position:relative;}
+.chart-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,224,.25),transparent);}
+.chart-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.chart-sub{font-size:11px;color:var(--text-2);margin-bottom:14px;}
+.chart-area{position:relative;}
+.early-flag{display:inline-flex;align-items:center;gap:5px;background:rgba(240,48,80,.1);border:1px solid rgba(240,48,80,.3);color:var(--red);font-size:10px;padding:3px 8px;border-radius:3px;margin-left:8px;font-weight:600;}
+
+/* Pre-mortality grid */
+.premort-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:10px;}
+.pen-cell{height:32px;border-radius:3px;background:rgba(40,212,114,.15);border:1px solid rgba(40,212,114,.2);position:relative;display:flex;align-items:center;justify-content:center;}
+.pen-cell.alert-pen{background:rgba(232,147,10,.15);border-color:var(--amber);}
+.pen-cell.monitor{background:rgba(232,147,10,.2);border-color:var(--amber);animation:pulse-amber 2s infinite;}
+.pen-label{font-size:8px;font-family:'IBM Plex Mono',monospace;color:var(--text-2);}
+.monitor-badge{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--amber);color:#000;font-size:8px;font-weight:700;padding:1px 5px;border-radius:2px;white-space:nowrap;}
+@keyframes pulse-amber{0%,100%{box-shadow:0 0 0 0 rgba(232,147,10,.4);}50%{box-shadow:0 0 0 5px rgba(232,147,10,0);}}
+.premort-stats{display:flex;gap:16px;margin-top:12px;}
+.pstat{display:flex;flex-direction:column;gap:2px;}
+.pstat-label{font-size:10px;color:var(--text-2);}
+.pstat-val{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:var(--amber);}
+
+/* Clustering heatmap */
+.heatmap-wrap{overflow-x:auto;}
+.heatmap-labels-top{display:flex;margin-left:36px;margin-bottom:3px;}
+.heatmap-day-label{flex:1;text-align:center;font-size:10px;color:var(--text-2);}
+.heatmap-body{display:flex;gap:0;}
+.heatmap-hours{display:flex;flex-direction:column;margin-right:4px;}
+.heatmap-hour-label{height:12px;font-size:9px;color:var(--text-3);text-align:right;line-height:12px;font-family:'IBM Plex Mono',monospace;}
+#clustering-canvas{border-radius:3px;display:block;}
+
+/* ── SHED OPERATIONS TAB ── */
+#tab-operations{overflow-y:auto;}
+.ops-layout{display:flex;flex-direction:column;gap:14px;padding:14px;}
+.ops-top{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.litter-map-wrap{display:flex;flex-direction:column;}
+.litter-svg-container{border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-top:10px;background:var(--bg-s2);}
+#litter-svg{width:100%;height:auto;}
+.litter-legend{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;}
+.ll-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2);}
+.ll-swatch{width:12px;height:12px;border-radius:2px;}
+.fault-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;}
+.fault-table th{background:var(--bg-s3);color:var(--text-2);font-weight:500;padding:7px 10px;text-align:left;font-size:10px;letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.fault-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);}
+.fault-table tr:hover td{background:var(--bg-s2);}
+.status-pill{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;letter-spacing:.3px;}
+.status-active{background:rgba(240,48,80,.15);color:var(--red);}
+.status-invest{background:rgba(232,147,10,.15);color:var(--amber);}
+.status-resolved{background:rgba(40,212,114,.12);color:var(--green);}
+
+/* ── AI ASSISTANT TAB ── */
+#tab-ai{overflow:hidden;}
+.ai-layout{display:flex;height:100%;}
+.ai-chat-main{flex:1;display:flex;flex-direction:column;min-width:0;}
+.ai-messages{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px;}
+.ai-msg{display:flex;flex-direction:column;gap:5px;max-width:72%;}
+.ai-msg.user{align-self:flex-end;}
+.ai-msg.assistant{align-self:flex-start;}
+.msg-bubble{padding:11px 15px;border-radius:8px;line-height:1.6;font-size:13px;}
+.ai-msg.user .msg-bubble{background:rgba(0,200,224,.12);border:1px solid rgba(0,200,224,.25);color:var(--text);}
+.ai-msg.assistant .msg-bubble{background:var(--bg-s2);border:1px solid var(--border);color:var(--text);}
+.msg-sender{font-size:10px;color:var(--text-2);font-weight:600;letter-spacing:.3px;padding:0 4px;}
+.msg-data{font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--bg-s3);border:1px solid var(--border);border-radius:4px;padding:8px 12px;margin-top:6px;color:var(--cyan);line-height:1.8;}
+.ai-input-wrap{border-top:1px solid var(--border);padding:14px 24px;display:flex;gap:10px;background:var(--bg-s1);}
+.ai-input{flex:1;background:var(--bg-s2);border:1px solid var(--border-hi);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 14px;border-radius:6px;outline:none;transition:border-color .15s;}
+.ai-input:focus{border-color:var(--cyan);}
+.ai-send{background:var(--cyan);border:none;color:#000;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;padding:10px 18px;border-radius:6px;cursor:pointer;transition:opacity .15s;}
+.ai-send:hover{opacity:.85;}
+.ai-sidebar{width:260px;border-left:1px solid var(--border);padding:20px 16px;background:var(--bg-s1);display:flex;flex-direction:column;gap:14px;overflow-y:auto;}
+.ai-sidebar-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text-2);letter-spacing:.3px;text-transform:uppercase;}
+.quick-chips{display:flex;flex-direction:column;gap:8px;}
+.quick-chip{background:var(--bg-s2);border:1px solid var(--border-hi);color:var(--text-2);font-size:12px;padding:9px 12px;border-radius:5px;cursor:pointer;transition:all .15s;text-align:left;line-height:1.4;}
+.quick-chip:hover{border-color:var(--cyan);color:var(--text);}
+.ai-sys-info{margin-top:auto;font-size:10px;color:var(--text-3);line-height:1.6;border-top:1px solid var(--border);padding-top:12px;}
+
+/* ── FLOATING AI BUBBLE ── */
+#ai-bubble{position:fixed;bottom:24px;right:24px;width:48px;height:48px;background:var(--cyan);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;box-shadow:0 0 20px rgba(0,200,224,.4);font-size:20px;transition:all .2s;}
+#ai-bubble:hover{transform:scale(1.08);}
+#ai-float-panel{position:fixed;bottom:82px;right:24px;width:320px;background:var(--bg-s1);border:1px solid var(--border-hi);border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.6);z-index:999;display:none;flex-direction:column;overflow:hidden;max-height:480px;}
+#ai-float-panel.open{display:flex;}
+.afp-header{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--bg-s2);}
+.afp-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+.afp-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);flex:1;}
+.afp-close{background:none;border:none;color:var(--text-2);cursor:pointer;font-size:16px;padding:2px;}
+.afp-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;}
+.afp-msg{font-size:12px;padding:9px 12px;border-radius:6px;line-height:1.55;}
+.afp-msg.user{background:rgba(0,200,224,.1);border:1px solid rgba(0,200,224,.2);color:var(--text);align-self:flex-end;max-width:85%;}
+.afp-msg.assistant{background:var(--bg-s2);border:1px solid var(--border);color:var(--text);align-self:flex-start;max-width:92%;}
+.afp-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;border-top:1px solid var(--border);}
+.afp-chip{background:var(--bg-s2);border:1px solid var(--border-hi);color:var(--text-2);font-size:11px;padding:5px 10px;border-radius:4px;cursor:pointer;transition:all .15s;}
+.afp-chip:hover{border-color:var(--cyan);color:var(--text);}
+.afp-input-row{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--border);}
+.afp-input{flex:1;background:var(--bg-s2);border:1px solid var(--border-hi);color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;padding:7px 10px;border-radius:4px;outline:none;}
+.afp-input:focus{border-color:var(--cyan);}
+.afp-send{background:var(--cyan);border:none;color:#000;font-weight:700;font-size:11px;padding:7px 12px;border-radius:4px;cursor:pointer;}
+.typing-indicator{display:flex;gap:4px;align-items:center;padding:9px 12px;}
+.typing-dot{width:5px;height:5px;border-radius:50%;background:var(--text-2);animation:typing 1.2s infinite;}
+.typing-dot:nth-child(2){animation-delay:.2s;}
+.typing-dot:nth-child(3){animation-delay:.4s;}
+@keyframes typing{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-4px);}}
+
+/* ── TOOLTIP ── */
+#three-tooltip{position:fixed;background:rgba(9,12,20,.95);border:1px solid var(--border-hi);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 10px;border-radius:4px;pointer-events:none;z-index:500;display:none;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.5);}
+
+/* ── SCROLLBARS ── */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--bg-s3);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--border-hi);}
+
+/* ── SECTION HEADER ── */
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:2px;}
+.section-tag{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--cyan);background:rgba(0,200,224,.08);border:1px solid rgba(0,200,224,.2);padding:2px 7px;border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo"><span>Flock</span><em>Sense</em></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
+    <button class="nav-tab" data-tab="birdhealth">Bird Health</button>
+    <button class="nav-tab" data-tab="operations">Shed Operations</button>
+    <button class="nav-tab" data-tab="ai">AI Assistant</button>
+    <button class="nav-tab disabled">User Mgmt</button>
+  </div>
+  <div class="nav-right">
+    <select class="shed-select">
+      <option>PRF Shed A</option>
+      <option>PRF Shed B</option>
+      <option>PRF Shed C</option>
+    </select>
+    <span class="flock-badge">DAY 18 · ROSS 308</span>
+    <span class="nav-clock" id="nav-clock">00:00:00</span>
+  </div>
+</nav>
+
+<!-- TAB 1: DASHBOARD -->
+<div id="tab-dashboard" class="tab-panel active">
+  <div class="dash-top">
+    <div class="shed-wrap">
+      <div class="layer-bar">
+        <span class="layer-bar-label">Layer</span>
+        <button class="layer-btn active" data-layer="activity">Activity</button>
+        <button class="layer-btn" data-layer="litter">Litter</button>
+        <button class="layer-btn" data-layer="temperature">Temperature</button>
+        <button class="layer-btn" data-layer="humidity">Humidity</button>
+        <button class="layer-btn" data-layer="clustering">Clustering</button>
+        <div class="layer-sep"></div>
+        <button class="layer-btn" data-layer="welfare">Welfare Index <span class="beta-badge">BETA</span></button>
+        <button class="layer-btn" data-layer="fcr">FCR <span class="beta-badge">BETA</span></button>
+        <button class="layer-btn" data-layer="weight">Approx. Weight <span class="beta-badge">BETA</span></button>
+        <span style="margin-left:auto;font-size:10px;color:var(--text-3);">Drag to rotate · Scroll to zoom</span>
+      </div>
+      <div id="shed-container"></div>
+      <div class="shed-legend" id="shed-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><span>High activity</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div><span>Moderate</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div><span>Alert zone</span></div>
+      </div>
+      <div class="sensor-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#00c8e0;box-shadow:0 0 5px #00c8e0"></div><span style="font-size:10px;color:var(--text-2)">mmWave node</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f0a040;box-shadow:0 0 5px #f0a040"></div><span style="font-size:10px;color:var(--text-2)">T+RH sensor</span></div>
+      </div>
+    </div>
+    <div class="kpi-sidebar">
+
+      <!-- Live Camera Feeds -->
+      <div class="kpi-card">
+        <div class="kpi-label">Live Camera Feeds</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
+          <div>
+            <div style="font-size:10px;color:var(--text-2);margin-bottom:3px;">Node 1 — Pen A</div>
+            <img id="camera-node1" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;border:1px solid var(--border);background:var(--bg-s2);">
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-2);margin-bottom:3px;">Node 2 — Pen B</div>
+            <img id="camera-node2" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;border:1px solid var(--border);background:var(--bg-s2);">
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI 1: Activity -->
+      <div class="kpi-card">
+        <div class="kpi-label">Flock Activity Index</div>
+        <div style="display:flex;align-items:baseline;gap:10px;">
+          <div class="kpi-value" style="color:var(--green)">84</div>
+          <span class="kpi-trend trend-up">↑ +3</span>
+        </div>
+        <div class="kpi-sub">Avg across 48 pens · updated 60s</div>
+        <canvas class="kpi-spark" id="spark-activity" height="28"></canvas>
+      </div>
+
+      <!-- KPI 2: Litter -->
+      <div class="kpi-card">
+        <div class="kpi-label">Litter Condition</div>
+        <div class="donut-wrap">
+          <canvas class="donut-canvas" id="donut-litter" width="60" height="60"></canvas>
+          <div class="donut-legend">
+            <div class="donut-item"><div class="donut-swatch" style="background:var(--green)"></div><span>78% Friable</span></div>
+            <div class="donut-item"><div class="donut-swatch" style="background:var(--amber)"></div><span>16% Saturated</span></div>
+            <div class="donut-item"><div class="donut-swatch" style="background:#7c3a0a"></div><span>6% Caked</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI 3: Temperature -->
+      <div class="kpi-card">
+        <div class="kpi-label">Shed Temperature</div>
+        <div class="range-avg">29.4<span style="font-size:16px;font-weight:400;color:var(--text-2)">°C</span></div>
+        <div class="kpi-sub">Shed average · 12 zones</div>
+        <div class="range-bar">
+          <div class="range-track"><div class="range-fill" style="left:12%;right:18%"></div></div>
+          <div class="range-ends"><span>28.1°C</span><span>32.7°C</span></div>
+        </div>
+      </div>
+
+      <!-- KPI 4: Weight -->
+      <div class="kpi-card">
+        <div class="kpi-label">Weight Proxy</div>
+        <div style="display:flex;align-items:baseline;gap:10px;">
+          <div class="kpi-value" style="color:var(--cyan);font-size:30px;">~905<span style="font-size:14px;font-weight:400;color:var(--text-2)">g</span></div>
+          <span class="badge-ok">ON TRACK</span>
+        </div>
+        <div class="kpi-sub" style="margin-top:6px;">Ross 308 standard: <span style="font-family:'IBM Plex Mono',monospace;color:var(--text)">890g</span> · +1.7%</div>
+      </div>
+
+      <!-- KPI 5: Alerts -->
+      <div class="kpi-card" style="border-color:rgba(240,48,80,.3);">
+        <div class="kpi-label">Active Alerts</div>
+        <div class="alerts-count">3</div>
+        <div class="alert-breakdown">
+          <div class="ab-item"><div class="ab-dot" style="background:var(--red)"></div><span>1 Critical &mdash; Zone 4L clustering</span></div>
+          <div class="ab-item"><div class="ab-dot" style="background:var(--amber)"></div><span>1 Warning &mdash; Litter Zone 2R</span></div>
+          <div class="ab-item"><div class="ab-dot" style="background:var(--blue)"></div><span>1 Info &mdash; Temp Zone 6R</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="timeline-wrap">
+    <span class="timeline-label" style="white-space:nowrap">00:00</span>
+    <button class="play-btn" id="play-btn">▶</button>
+    <div class="timeline-track">
+      <div class="timeline-events">
+        <div class="t-marker warning" style="left:29.2%" title="07:00 — Litter moisture rising Zone 2R"></div>
+        <div class="t-marker critical" style="left:48.8%" title="11:42 — Clustering alert Zone 4L"></div>
+        <div class="t-marker info" style="left:54.5%" title="13:05 — Temp approaching limit Zone 6R"></div>
+      </div>
+      <input type="range" id="timeline-range" class="timeline-range" min="0" max="100" value="75">
+    </div>
+    <span class="timeline-label" style="white-space:nowrap">23:59</span>
+    <span class="timeline-time" id="timeline-time">18:00</span>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="alerts-wrap">
+    <div class="alert-card critical">
+      <div class="alert-top">
+        <span class="alert-badge">CRITICAL</span>
+        <span class="alert-zone">Zone 4L — Row 3</span>
+        <span class="alert-time">11:42</span>
+      </div>
+      <div class="alert-msg">Abnormal clustering detected · Intensity 0.92 · Activity index 48</div>
+      <button class="alert-btn">Investigate</button>
+    </div>
+    <div class="alert-card warning">
+      <div class="alert-top">
+        <span class="alert-badge">WARNING</span>
+        <span class="alert-zone">Zone 2R — Row 2</span>
+        <span class="alert-time">09:15</span>
+      </div>
+      <div class="alert-msg">Litter saturation threshold exceeded · Index 0.72 · FPD risk 6.2</div>
+      <button class="alert-btn">Investigate</button>
+    </div>
+    <div class="alert-card info">
+      <div class="alert-top">
+        <span class="alert-badge">INFO</span>
+        <span class="alert-zone">Zone 6R — Row 1</span>
+        <span class="alert-time">13:05</span>
+      </div>
+      <div class="alert-msg">Temperature approaching upper limit · 32.7°C · Target max 32°C</div>
+      <button class="alert-btn">Dismiss</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: BIRD HEALTH -->
+<div id="tab-birdhealth" class="tab-panel">
+  <div class="bh-layout">
+
+    <!-- Activity trend -->
+    <div class="chart-card">
+      <div class="section-header">
+        <div class="chart-title">Flock Activity Index — 7 Day Trend</div>
+        <span class="section-tag">BEHAVIOUR</span>
+        <span class="early-flag">⚠ Early decline flag · Zone 4L</span>
+      </div>
+      <div class="chart-sub">Per-zone activity index (0–100 scale) · mmWave Doppler velocity + density</div>
+      <div class="chart-area" style="height:200px;"><canvas id="activity-chart"></canvas></div>
+    </div>
+
+    <!-- Weight chart -->
+    <div class="chart-card">
+      <div class="section-header">
+        <div class="chart-title">Weight Proxy vs. Ross 308 Standard</div>
+        <span class="section-tag">GROWTH</span>
+      </div>
+      <div class="chart-sub">Mean z-height point cloud calibrated to breed curve · Days 1–18</div>
+      <div class="chart-area" style="height:200px;"><canvas id="weight-chart"></canvas></div>
+    </div>
+
+    <!-- Clustering heatmap -->
+    <div class="chart-card">
+      <div class="section-header">
+        <div class="chart-title">Clustering Intensity — Zone 4L</div>
+        <span class="section-tag">SPATIAL</span>
+      </div>
+      <div class="chart-sub">7 days × 24 hours · Warmer = denser clustering · Pattern shows early-morning accumulation</div>
+      <div class="heatmap-wrap">
+        <div class="heatmap-labels-top" id="heatmap-days"></div>
+        <div class="heatmap-body">
+          <div class="heatmap-hours" id="heatmap-hours"></div>
+          <canvas id="clustering-canvas" width="294" height="288"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pre-mortality risk -->
+    <div class="chart-card">
+      <div class="section-header">
+        <div class="chart-title">Pre-Mortality Risk — All Zones</div>
+        <span class="section-tag">MORTALITY</span>
+      </div>
+      <div class="chart-sub">Zero-Doppler density + activity collapse score · Amber = monitor threshold</div>
+      <div style="font-size:10px;color:var(--text-2);margin-bottom:6px;">Left side (L) — Zones 1–6 · 4 rows each</div>
+      <div class="premort-grid" id="premort-grid-left"></div>
+      <div style="font-size:10px;color:var(--text-2);margin:10px 0 6px;">Right side (R) — Zones 1–6 · 4 rows each</div>
+      <div class="premort-grid" id="premort-grid-right"></div>
+      <div class="premort-stats">
+        <div class="pstat"><div class="pstat-label">Zone 4L Row 3 — Zero-Doppler density</div><div class="pstat-val">0.84</div></div>
+        <div class="pstat"><div class="pstat-label">Activity collapse score</div><div class="pstat-val">0.67</div></div>
+        <div class="pstat"><div class="pstat-label">Risk composite</div><div class="pstat-val" style="color:var(--red)">HIGH</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TAB 3: SHED OPERATIONS -->
+<div id="tab-operations" class="tab-panel">
+  <div class="ops-layout">
+
+    <div class="ops-top">
+      <!-- Litter Map -->
+      <div class="chart-card litter-map-wrap">
+        <div class="section-header">
+          <div class="chart-title">Litter Substrate Map</div>
+          <span class="section-tag">LITTER</span>
+        </div>
+        <div class="chart-sub">Top-down floor plan · FPD risk score overlaid (0–10) · Updated every 10 min</div>
+        <div class="litter-svg-container"><svg id="litter-svg" viewBox="0 0 640 380" xmlns="http://www.w3.org/2000/svg"></svg></div>
+        <div class="litter-legend">
+          <div class="ll-item"><div class="ll-swatch" style="background:#1a4d2a"></div>Friable (optimal)</div>
+          <div class="ll-item"><div class="ll-swatch" style="background:#7c4d00"></div>Saturated (wet)</div>
+          <div class="ll-item"><div class="ll-swatch" style="background:#3d1a00"></div>Caked (compacted)</div>
+          <div class="ll-item"><div class="ll-swatch" style="background:#1a2a1a;border:1px solid #333"></div>Aisle</div>
+        </div>
+      </div>
+
+      <!-- T+RH Chart -->
+      <div class="chart-card">
+        <div class="section-header">
+          <div class="chart-title">Temperature & Humidity — 48h</div>
+          <span class="section-tag">ENVIRONMENT</span>
+        </div>
+        <div class="chart-sub">4 zones · Bird-level sensors (1m above litter) · Shaded = comfort range</div>
+        <div class="chart-area" style="height:260px;"><canvas id="trh-chart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Ventilation Fault Log -->
+    <div class="chart-card">
+      <div class="section-header">
+        <div class="chart-title">Environment & Ventilation Fault Log</div>
+        <span class="section-tag">FAULTS</span>
+      </div>
+      <div class="chart-sub">AI-generated recommended actions · Flock Day 18 · Last 24h</div>
+      <table class="fault-table">
+        <thead>
+          <tr>
+            <th>Time</th><th>Zone</th><th>Condition Detected</th><th>Recommended Action</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-family:'IBM Plex Mono',monospace;color:var(--text-2)">13:05</td>
+            <td><strong>Zone 6R</strong></td>
+            <td>Temperature at 32.7°C — approaching upper welfare limit (32°C target)</td>
+            <td>Check east-wall ventilation fans · Increase airflow rate to Zone 6</td>
+            <td><span class="status-pill status-active">ACTIVE</span></td>
+          </tr>
+          <tr>
+            <td style="font-family:'IBM Plex Mono',monospace;color:var(--text-2)">09:15</td>
+            <td><strong>Zone 2R</strong></td>
+            <td>Humidity spike +9% above threshold · Backscatter index 0.72 rising</td>
+            <td>Inspect drinker lines rows 1–2 Zone 2R for leaks · Consider partial litter removal</td>
+            <td><span class="status-pill status-invest">INVESTIGATING</span></td>
+          </tr>
+          <tr>
+            <td style="font-family:'IBM Plex Mono',monospace;color:var(--text-2)">04:15</td>
+            <td><strong>Zone 3L</strong></td>
+            <td>Activity drop during rest period — possible cold stress in rows 3–4</td>
+            <td>Checked heating elements Zone 3L · Adjusted thermostat setpoint +0.5°C</td>
+            <td><span class="status-pill status-resolved">RESOLVED</span></td>
+          </tr>
+          <tr>
+            <td style="font-family:'IBM Plex Mono',monospace;color:var(--text-2)">01:30</td>
+            <td><strong>Zone 5R</strong></td>
+            <td>Avoidance zone detected — persistent low density (&lt;30% expected) since midnight</td>
+            <td>Inspect feeder access Zone 5R Row 2 · Check feed auger cycle timing</td>
+            <td><span class="status-pill status-resolved">RESOLVED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- TAB 4: AI ASSISTANT -->
+<div id="tab-ai" class="tab-panel">
+  <div class="ai-layout">
+    <div class="ai-chat-main">
+      <div class="ai-messages" id="ai-messages">
+
+        <div class="ai-msg user">
+          <span class="msg-sender">YOU</span>
+          <div class="msg-bubble">Which zones had elevated litter moisture this week?</div>
+        </div>
+
+        <div class="ai-msg assistant">
+          <span class="msg-sender">FLOCKSENSE AI</span>
+          <div class="msg-bubble">Based on backscatter intensity readings over the past 7 days, two zones show elevated moisture above the 35% threshold:<br><br>
+          <strong>Zone 2R</strong> (right side): Moisture index trending upward since Day 15, now reading 0.72 on the 0–1 backscatter scale (~38% estimated moisture). Progression suggests a drinker line issue or localised crowding near water access. FPD risk score is currently <strong style="color:var(--amber)">6.2 / 10</strong>.<br><br>
+          <strong>Zone 4L</strong> (left side): Moderate elevation at 0.55 — amber watch threshold. Slower progression, possibly normal flock-related moisture accumulation at Day 18.</div>
+          <div class="msg-data">RECOMMENDATION → Inspect drinker lines Zone 2R rows 1–2 before next management visit.
+If leak confirmed: partial litter removal + replacement recommended.
+FPD risk will escalate above 7.0 within ~36h if untreated.</div>
+        </div>
+
+        <div class="ai-msg user">
+          <span class="msg-sender">YOU</span>
+          <div class="msg-bubble">Is the activity drop in Zone 4L something to worry about?</div>
+        </div>
+
+        <div class="ai-msg assistant">
+          <span class="msg-sender">FLOCKSENSE AI</span>
+          <div class="msg-bubble">The Zone 4L activity trend warrants close attention. The decline has been sustained and accelerating over 4 days:</div>
+          <div class="msg-data">Day 14  →  Activity index: 80  (normal range Day 14 Ross 308)
+Day 15  →  Activity index: 74  (first deviation below zone average)
+Day 16  →  Activity index: 68  (1.4 SD below 6-zone mean)
+Day 17  →  Activity index: 59  (accelerating decline)
+Day 18  →  Activity index: 48  ⚠ SIGNIFICANTLY BELOW NORMAL</div>
+          <div class="msg-bubble" style="margin-top:8px;">The clustering alert detected at 11:42 this morning (intensity 0.92) in the same zone strengthens the concern. Lethargy combined with spatial clustering is a recognised pre-disease signature in Ross 308 broilers.<br><br>Historical comparison: a similar pattern in PRF Shed B (Day 22, Flock 12) preceded a confirmed respiratory outbreak by <strong style="color:var(--red)">36 hours</strong>. Early intervention at that stage reduced flock mortality by an estimated 2.1%.<br><br>
+          <strong>Priority actions:</strong><br>
+          1 · Unscheduled walkthrough Zone 4L within 2 hours<br>
+          2 · Inspect feed + water access for blockage<br>
+          3 · Observe for respiratory signs, drooping, reduced vocalisation<br>
+          4 · If clinical signs found: notify veterinarian, initiate flock health protocol</div>
+        </div>
+
+      </div>
+      <div class="ai-input-wrap">
+        <input class="ai-input" id="ai-main-input" type="text" placeholder="Ask FlockSense AI about your flock…">
+        <button class="ai-send" id="ai-main-send">Send</button>
+      </div>
+    </div>
+    <div class="ai-sidebar">
+      <div class="ai-sidebar-title">Quick Insights</div>
+      <div class="quick-chips">
+        <button class="quick-chip" data-q="What is the current footpad dermatitis risk across all zones?">What is the current FPD risk across all zones?</button>
+        <button class="quick-chip" data-q="Compare today's flock activity to the previous 3 flocks at Day 18.">Compare today's activity to previous flocks at Day 18</button>
+        <button class="quick-chip" data-q="Which zones show avoidance behaviour and what could be causing it?">Which zones show avoidance behaviour?</button>
+        <button class="quick-chip" data-q="Generate a summary report for this flock week for the research log.">Generate weekly research log summary</button>
+      </div>
+      <div class="ai-sys-info">
+        <strong style="color:var(--text-2)">System status</strong><br>
+        mmWave nodes: <span style="color:var(--green)">6/6 online</span><br>
+        T+RH sensors: <span style="color:var(--green)">12/12 online</span><br>
+        Last sync: <span style="color:var(--text)">18:00:14</span><br>
+        Data rate: <span style="color:var(--text)">2 fps · 48 pens</span><br>
+        Edge compute: <span style="color:var(--green)">RPi4 nominal</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div id="three-tooltip"></div>
+
+<!-- FLOATING AI BUBBLE -->
+<div id="ai-bubble">💬</div>
+<div id="ai-float-panel">
+  <div class="afp-header">
+    <div class="afp-dot"></div>
+    <span class="afp-title">FlockSense AI</span>
+    <button class="afp-close" id="afp-close">✕</button>
+  </div>
+  <div class="afp-messages" id="afp-messages">
+    <div class="afp-msg assistant">Hi! I'm monitoring your flock live. Zone 4L has an active clustering alert. Ask me anything about the shed.</div>
+  </div>
+  <div class="afp-chips">
+    <button class="afp-chip">Current flock status?</button>
+    <button class="afp-chip">Any urgent alerts?</button>
+    <button class="afp-chip">Today's weight estimate?</button>
+  </div>
+  <div class="afp-input-row">
+    <input class="afp-input" id="afp-input" placeholder="Ask anything…" type="text">
+    <button class="afp-send" id="afp-send">↑</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  SIMULATED DATA
+// ═══════════════════════════════════════════════
+const penData = [];
+for (let side = 0; side < 2; side++) {
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 6; col++) {
+      const act  = 75 + Math.random() * 20;
+      const lit  = 0.08 + Math.random() * 0.22;
+      const tmp  = 28.2 + Math.random() * 2.5;
+      const hum  = 61 + Math.random() * 14;
+      const clus = 0.04 + Math.random() * 0.18;
+      // Welfare: composite 0-100. Penalise high temp, high humidity, poor litter, low activity, clustering.
+      const thi     = tmp + 0.36 * hum - 41.2;
+      const thiPen  = Math.max(0, (thi - 27) / 10);
+      const welfare = Math.round(Math.max(0, Math.min(100,
+        act * 0.35 + (1 - lit) * 30 + (1 - clus) * 20 + (1 - thiPen) * 15)));
+      // FCR: good baseline ~1.45 for Day 18 Ross 308, elevated by poor welfare
+      const fcr = parseFloat((1.42 + (1 - welfare/100) * 0.6 + (Math.random() - 0.5) * 0.06).toFixed(2));
+      // Approx weight: mean z-height proxy → g. Day 18 std 890g ±variance by pen
+      const weight = Math.round(890 + (welfare - 75) * 3.5 + (Math.random() - 0.5) * 40);
+      penData.push({
+        side, row, col,
+        activity: act, litter: lit, temp: tmp, humidity: hum, clustering: clus,
+        welfare, fcr, weight,
+      });
+    }
+  }
+}
+// Zone 4L clustering alert: left side (side=0), col=3, row=2 → idx=0*24+2*6+3=15
+penData[15].clustering = 0.92; penData[15].activity = 48;
+penData[14].clustering = 0.55; penData[14].activity = 58; // neighbour
+// Zone 2R litter: right side (side=1), col=1, row=1 → idx=24+1*6+1=31
+penData[31].litter = 0.72; penData[25].litter = 0.55;
+// Zone 6R temp: right side (side=1), col=5, row=0 → idx=24+0*6+5=29
+penData[29].temp = 32.7;
+// Some additional subtle variation
+penData[9].litter  = 0.48;
+penData[38].clustering = 0.42;
+
+// ═══════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  document.getElementById('nav-clock').textContent =
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0') + ':' +
+    String(now.getSeconds()).padStart(2,'0');
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ═══════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════
+const tabInitialized = {};
+document.querySelectorAll('.nav-tab:not(.disabled)').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const tabId = 'tab-' + btn.dataset.tab;
+    document.getElementById(tabId).classList.add('active');
+    if (!tabInitialized[btn.dataset.tab]) {
+      tabInitialized[btn.dataset.tab] = true;
+      if (btn.dataset.tab === 'birdhealth') initBirdHealthCharts();
+      if (btn.dataset.tab === 'operations') initOpsCharts();
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════
+//  THREE.JS — SHED MODEL
+// ═══════════════════════════════════════════════
+function initThreeJS() {
+  const container = document.getElementById('shed-container');
+  const W = container.clientWidth, H = container.clientHeight;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x090c14);
+  scene.fog = new THREE.FogExp2(0x090c14, 0.018);
+
+  const camera = new THREE.PerspectiveCamera(48, W / H, 0.1, 300);
+  let sph = { theta: 0.78, phi: 0.70, r: 36 };
+  function applySph() {
+    camera.position.set(
+      sph.r * Math.sin(sph.phi) * Math.sin(sph.theta),
+      sph.r * Math.cos(sph.phi),
+      sph.r * Math.sin(sph.phi) * Math.cos(sph.theta)
+    );
+    camera.lookAt(0, 1, 0);
+  }
+  applySph();
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W, H);
+  renderer.shadowMap.enabled = false;
+  container.appendChild(renderer.domElement);
+
+  // Lighting
+  scene.add(new THREE.AmbientLight(0xaabbcc, 0.55));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.9);
+  sun.position.set(12, 22, 14);
+  scene.add(sun);
+  const fill = new THREE.DirectionalLight(0x4060a0, 0.35);
+  fill.position.set(-10, 8, -12);
+  scene.add(fill);
+
+  // ── SHED FLOOR ──
+  const floorGeo = new THREE.PlaneGeometry(22, 30);
+  const floorMat = new THREE.MeshLambertMaterial({ color: 0x131820 });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI / 2;
+  scene.add(floor);
+
+  // Aisle
+  const aisleMat = new THREE.MeshLambertMaterial({ color: 0x1a2230 });
+  const aisle = new THREE.Mesh(new THREE.PlaneGeometry(3, 28), aisleMat);
+  aisle.rotation.x = -Math.PI / 2;
+  aisle.position.y = 0.005;
+  scene.add(aisle);
+
+  // ── WALLS (semi-transparent) ──
+  const wallMat = new THREE.MeshLambertMaterial({ color: 0x1a2030, transparent: true, opacity: 0.22, side: THREE.DoubleSide });
+  [[-11,2.5,0,Math.PI/2,28,5],[11,2.5,0,-Math.PI/2,28,5]].forEach(([x,y,z,ry,w,h]) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), wallMat);
+    m.rotation.y = ry; m.position.set(x,y,z); scene.add(m);
+  });
+  [
+    [0,2.5,-14,0,22,5],
+    [0,2.5, 14,Math.PI,22,5]
+  ].forEach(([x,y,z,ry,w,h]) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), wallMat);
+    m.rotation.y = ry; m.position.set(x,y,z); scene.add(m);
+  });
+
+  // ── CEILING ──
+  const ceilMat = new THREE.MeshLambertMaterial({ color: 0x1e2535, transparent: true, opacity: 0.18, side: THREE.DoubleSide });
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(22, 30), ceilMat);
+  ceil.rotation.x = Math.PI / 2; ceil.position.y = 5; scene.add(ceil);
+
+  // Ceiling beams
+  const beamMat = new THREE.MeshLambertMaterial({ color: 0x252f42 });
+  [-8,-4,0,4,8].forEach(x => {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 30), beamMat);
+    b.position.set(x, 4.92, 0); scene.add(b);
+  });
+  [-11,-6,0,6,11].forEach(z => {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(22, 0.12, 0.12), beamMat);
+    b.position.set(0, 4.85, z); scene.add(b);
+  });
+
+  // ── PEN TILES & CAGE WIREFRAMES ──
+  const penMeshes = [];
+  const Z_CTR  = [-10, -6, -2, 2, 6, 10];
+  const LX_CTR = [-2.5, -4.5, -6.5, -8.5];
+  const RX_CTR = [ 2.5,  4.5,  6.5,  8.5];
+  const PW = 1.82, PL = 3.82;
+
+  function makePen(x, z, idx) {
+    const mat = new THREE.MeshLambertMaterial({ color: 0x28d472 });
+    const tile = new THREE.Mesh(new THREE.PlaneGeometry(PW, PL), mat);
+    tile.rotation.x = -Math.PI / 2;
+    tile.position.set(x, 0.01, z);
+    tile.userData = { penIdx: idx };
+    scene.add(tile);
+    penMeshes.push(tile);
+
+    const cage = new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(PW + 0.15, 1.4, PL + 0.15)),
+      new THREE.LineBasicMaterial({ color: 0x2e3f58, transparent: true, opacity: 0.85 })
+    );
+    cage.position.set(x, 0.7, z);
+    scene.add(cage);
+  }
+
+  let pi = 0;
+  for (let row = 0; row < 4; row++)
+    for (let col = 0; col < 6; col++)
+      makePen(LX_CTR[row], Z_CTR[col], pi++);
+  for (let row = 0; row < 4; row++)
+    for (let col = 0; col < 6; col++)
+      makePen(RX_CTR[row], Z_CTR[col], pi++);
+
+  // ── SENSOR NODES ──
+  const sensorObjs = [];
+  const cyanMat  = new THREE.MeshBasicMaterial({ color: 0x00c8e0 });
+  const orangeMat = new THREE.MeshBasicMaterial({ color: 0xf0a040 });
+
+  // mmWave nodes — ceiling center
+  Z_CTR.forEach((z, i) => {
+    const s = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), cyanMat.clone());
+    s.position.set(0, 4.78, z);
+    s.userData = { label: `mmWave Node ${i+1} | Zone ${i+1} | SNR: ${(13.5+Math.random()*3).toFixed(1)} dB | 2 fps` };
+    scene.add(s); sensorObjs.push(s);
+    const gl = new THREE.PointLight(0x00c8e0, 0.5, 5);
+    gl.position.copy(s.position); scene.add(gl);
+    // cable
+    const cb = new THREE.Mesh(new THREE.CylinderGeometry(0.018,0.018,0.45), new THREE.MeshBasicMaterial({color:0x303848}));
+    cb.position.set(0, 5 - 0.225, z); scene.add(cb);
+  });
+
+  // T+RH sensors
+  [[-4.5,-9,1.2],[-4.5,3,1.2],[4.5,-5,1.2],[4.5,7,1.2]].forEach(([x,z,y],i) => {
+    const s = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), orangeMat.clone());
+    s.position.set(x, y, z);
+    s.userData = { label: `T+RH Sensor ${i+1} | Temp: ${(28.5+i*0.65).toFixed(1)}°C | RH: ${(64+i*3).toFixed(0)}%` };
+    scene.add(s); sensorObjs.push(s);
+    const gl = new THREE.PointLight(0xf0a040, 0.4, 3.5);
+    gl.position.copy(s.position); scene.add(gl);
+  });
+
+  // ── PENDANT LIGHTS ──
+  Z_CTR.forEach(z => {
+    [-6, 6].forEach(x => {
+      const cb = new THREE.Mesh(new THREE.CylinderGeometry(0.016,0.016,0.65), new THREE.MeshBasicMaterial({color:0x2a3040}));
+      cb.position.set(x, 4.67, z); scene.add(cb);
+      const sh = new THREE.Mesh(new THREE.ConeGeometry(0.26,0.22,8), new THREE.MeshLambertMaterial({color:0x505868}));
+      sh.rotation.x = Math.PI; sh.position.set(x, 4.2, z); scene.add(sh);
+      const bl = new THREE.PointLight(0xfff0c0, 0.55, 6);
+      bl.position.set(x, 4.0, z); scene.add(bl);
+    });
+  });
+
+  // ── LAYER SYSTEM ──
+  function lerpHex(c1, c2, t) {
+    t = Math.max(0, Math.min(1, t));
+    const r1=(c1>>16)&255, g1=(c1>>8)&255, b1=c1&255;
+    const r2=(c2>>16)&255, g2=(c2>>8)&255, b2=c2&255;
+    return ((Math.round(r1+(r2-r1)*t)<<16)|(Math.round(g1+(g2-g1)*t)<<8)|Math.round(b1+(b2-b1)*t));
+  }
+  function penColor(layer, idx) {
+    const d = penData[idx];
+    if (layer === 'activity') {
+      const a = d.activity / 100;
+      return a > 0.7 ? lerpHex(0xf59e0b, 0x28d472, (a-0.7)/0.3) : lerpHex(0xf03050, 0xf59e0b, a/0.7);
+    }
+    if (layer === 'litter') {
+      return d.litter < 0.35 ? lerpHex(0x155227, 0x28d472, 1-d.litter/0.35)
+           : d.litter < 0.65 ? lerpHex(0xd97706, 0x78350f, (d.litter-0.35)/0.3)
+           : lerpHex(0x4a1a00, 0x78350f, (d.litter-0.65)/0.35);
+    }
+    if (layer === 'temperature') {
+      const t = (d.temp - 27) / 7;
+      return t < 0.45 ? lerpHex(0x2563eb, 0x28d472, t/0.45) : lerpHex(0x28d472, 0xf03050, (t-0.45)/0.55);
+    }
+    if (layer === 'humidity') {
+      return lerpHex(0x93c5fd, 0x1e3a8a, (d.humidity - 55) / 35);
+    }
+    if (layer === 'clustering') {
+      return d.clustering < 0.3
+        ? lerpHex(0x1e293b, 0xfbbf24, d.clustering / 0.3)
+        : lerpHex(0xfbbf24, 0xf03050, (d.clustering - 0.3) / 0.7);
+    }
+    if (layer === 'welfare') {
+      // 100=green, 50=amber, 0=red
+      const w = d.welfare / 100;
+      return w > 0.6 ? lerpHex(0xf59e0b, 0x00e6b4, (w - 0.6) / 0.4)
+                     : lerpHex(0xf03050, 0xf59e0b, w / 0.6);
+    }
+    if (layer === 'fcr') {
+      // 1.3=green (efficient), 1.6=amber, >1.9=red (wasteful)
+      const f = Math.max(0, Math.min(1, (d.fcr - 1.3) / 0.65));
+      return f < 0.5 ? lerpHex(0x28d472, 0xffb400, f / 0.5)
+                     : lerpHex(0xffb400, 0xf03050, (f - 0.5) / 0.5);
+    }
+    if (layer === 'weight') {
+      // 750g=blue(underweight), 890g=green(on-curve), 1050g=purple(heavy)
+      const w = Math.max(0, Math.min(1, (d.weight - 750) / 350));
+      return w < 0.4 ? lerpHex(0x4080ff, 0x28d472, w / 0.4)
+           : w < 0.7 ? lerpHex(0x28d472, 0xb464ff, (w - 0.4) / 0.3)
+                     : lerpHex(0xb464ff, 0xf03050, (w - 0.7) / 0.3);
+    }
+    return 0x28d472;
+  }
+
+  const legends = {
+    activity:    ['High activity','Moderate','Alert zone','var(--green)','var(--amber)','var(--red)'],
+    litter:      ['Friable','Saturated','Caked','#28d472','#d97706','#7c3a0a'],
+    temperature: ['Cool (28°C)','Optimal','Hot (34°C)','#2563eb','#28d472','#f03050'],
+    humidity:    ['Dry (55%)','Moderate','Humid (85%)','#93c5fd','#4080ff','#1e3a8a'],
+    clustering:  ['Normal','Moderate','Dense cluster','#1e293b','#fbbf24','#f03050'],
+    welfare:     ['High welfare','Moderate','Welfare concern','#00e6b4','#f59e0b','#f03050'],
+    fcr:         ['Efficient (1.3)','Average (1.6)','Wasteful (1.9+)','#28d472','#ffb400','#f03050'],
+    weight:      ['Underweight','On-curve (890g)','Above curve','#4080ff','#28d472','#b464ff'],
+  };
+
+  let currentLayer = 'activity';
+
+  function updateLayer(layer) {
+    currentLayer = layer;
+    penMeshes.forEach((m, i) => m.material.color.setHex(penColor(layer, i)));
+    document.querySelectorAll('.layer-btn').forEach(b => b.classList.toggle('active', b.dataset.layer === layer));
+    const lg = legends[layer];
+    document.getElementById('shed-legend').innerHTML = [0,1,2].map(i =>
+      `<div class="legend-item"><div class="legend-dot" style="background:${lg[3+i]}"></div><span>${lg[i]}</span></div>`
+    ).join('');
+  }
+  window.updateLayer = updateLayer;
+  updateLayer('activity');
+
+  document.querySelectorAll('.layer-btn').forEach(btn => {
+    btn.addEventListener('click', () => updateLayer(btn.dataset.layer));
+  });
+
+  // ── HOVER TOOLTIP ──
+  const raycaster = new THREE.Raycaster();
+  const mouse2 = new THREE.Vector2();
+  const tip = document.getElementById('three-tooltip');
+  const allHover = [...sensorObjs, ...penMeshes];
+
+  renderer.domElement.addEventListener('mousemove', e => {
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse2.x = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+    mouse2.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+    raycaster.setFromCamera(mouse2, camera);
+    const hits = raycaster.intersectObjects(allHover);
+    if (hits.length > 0) {
+      const obj = hits[0].object;
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top  = (e.clientY - 30) + 'px';
+      if (obj.userData.label) {
+        tip.textContent = obj.userData.label;
+      } else if (obj.userData.penIdx !== undefined) {
+        const d = penData[obj.userData.penIdx];
+        const side = obj.userData.penIdx < 24 ? 'L' : 'R';
+        const li = obj.userData.penIdx % 24;
+        const zone = li % 6 + 1, row = Math.floor(li / 6) + 1;
+        const ls = d.litter < 0.35 ? 'Friable' : d.litter < 0.65 ? 'Saturated' : 'Caked';
+        const layerExtra = {
+          welfare:     `  ·  Welfare: ${d.welfare}/100`,
+          fcr:         `  ·  FCR: ${d.fcr}  ·  ${d.fcr < 1.5 ? '✓ Efficient' : d.fcr < 1.7 ? '⚠ Watch' : '✗ Poor'}`,
+          weight:      `  ·  Weight: ~${d.weight}g  ·  Std: 890g  ·  ${d.weight >= 890 ? '+' : ''}${d.weight - 890}g`,
+        }[currentLayer] || '';
+        tip.textContent = `Zone ${zone}${side} R${row}  ·  Act: ${d.activity.toFixed(0)}  ·  ${ls}  ·  ${d.temp.toFixed(1)}°C  ${d.humidity.toFixed(0)}%RH${layerExtra}`;
+      }
+      tip.style.display = 'block';
+    } else {
+      tip.style.display = 'none';
+    }
+  });
+
+  // ── ORBIT CONTROLS ──
+  let dragging = false, prev = {x:0,y:0};
+  renderer.domElement.addEventListener('mousedown', e => { dragging=true; prev={x:e.clientX,y:e.clientY}; });
+  window.addEventListener('mouseup', () => { dragging = false; });
+  renderer.domElement.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    sph.theta += (e.clientX - prev.x) * 0.007;
+    sph.phi    = Math.max(0.18, Math.min(1.45, sph.phi + (e.clientY - prev.y) * 0.006));
+    prev = {x: e.clientX, y: e.clientY};
+    applySph();
+  });
+  renderer.domElement.addEventListener('wheel', e => {
+    sph.r = Math.max(14, Math.min(60, sph.r + e.deltaY * 0.04));
+    applySph();
+  }, { passive: true });
+
+  // ── RESIZE ──
+  new ResizeObserver(() => {
+    const w = container.clientWidth, h = container.clientHeight;
+    if (w === 0 || h === 0) return;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  }).observe(container);
+
+  // ── ANIMATE ──
+  (function loop() { requestAnimationFrame(loop); renderer.render(scene, camera); })();
+
+  window.camera = camera;
+  window.renderer = renderer;
+  window.penMeshes = penMeshes;
+}
+
+// ═══════════════════════════════════════════════
+//  KPI SPARKLINES & DONUT
+// ═══════════════════════════════════════════════
+function drawSparkline(id, data, color) {
+  const c = document.getElementById(id);
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const w = c.offsetWidth || 240, h = 28;
+  c.width = w; c.height = h;
+  const mn = Math.min(...data), mx = Math.max(...data), rng = mx - mn || 1;
+  ctx.beginPath();
+  data.forEach((v,i) => {
+    const x = (i/(data.length-1))*w, y = h - ((v-mn)/rng)*(h-4) - 2;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+  // Fill below
+  ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+  ctx.fillStyle = color + '18'; ctx.fill();
+}
+
+function drawDonut(id, data, colors) {
+  const c = document.getElementById(id);
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const cx=30, cy=30, r=26, inner=16;
+  let angle = -Math.PI/2;
+  const total = data.reduce((a,b)=>a+b,0);
+  data.forEach((v,i) => {
+    const slice = (v/total)*Math.PI*2;
+    ctx.beginPath();
+    ctx.arc(cx,cy,r,angle,angle+slice);
+    ctx.arc(cx,cy,inner,angle+slice,angle,true);
+    ctx.closePath();
+    ctx.fillStyle=colors[i]; ctx.fill();
+    angle += slice;
+  });
+}
+
+const sparkActivity = [72,75,78,76,80,82,84];
+const sparkData = sparkActivity;
+
+// ═══════════════════════════════════════════════
+//  TIMELINE SCRUBBER
+// ═══════════════════════════════════════════════
+const tlRange = document.getElementById('timeline-range');
+const tlTime  = document.getElementById('timeline-time');
+const playBtn = document.getElementById('play-btn');
+let playing = false, playInterval = null;
+
+function tlToTime(v) {
+  const mins = Math.round(v / 100 * 1440);
+  return String(Math.floor(mins/60)).padStart(2,'0') + ':' + String(mins%60).padStart(2,'0');
+}
+tlRange.addEventListener('input', () => { tlTime.textContent = tlToTime(tlRange.value); });
+tlTime.textContent = tlToTime(tlRange.value);
+
+playBtn.addEventListener('click', () => {
+  playing = !playing;
+  playBtn.textContent = playing ? '⏸' : '▶';
+  if (playing) {
+    playInterval = setInterval(() => {
+      const v = parseInt(tlRange.value);
+      if (v >= 100) { playing=false; playBtn.textContent='▶'; clearInterval(playInterval); return; }
+      tlRange.value = v + 1;
+      tlTime.textContent = tlToTime(tlRange.value);
+    }, 80);
+  } else {
+    clearInterval(playInterval);
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  BIRD HEALTH CHARTS
+// ═══════════════════════════════════════════════
+function initBirdHealthCharts() {
+  const DAYS = ['Day 12','Day 13','Day 14','Day 15','Day 16','Day 17','Day 18'];
+  const zones = [
+    { label:'Zone 1L', color:'#28d472', data:[88,87,89,88,87,88,87] },
+    { label:'Zone 2L', color:'#4080ff', data:[83,85,84,83,85,84,83] },
+    { label:'Zone 3L', color:'#a78bfa', data:[82,81,83,82,80,82,81] },
+    { label:'Zone 4L', color:'#f03050', data:[80,79,77,74,68,59,48], borderDash:[0] },
+    { label:'Zone 5R', color:'#00c8e0', data:[86,85,86,85,84,86,85] },
+    { label:'Zone 6R', color:'#f59e0b', data:[84,83,85,84,82,84,83] },
+  ];
+  const actCtx = document.getElementById('activity-chart').getContext('2d');
+  new Chart(actCtx, {
+    type: 'line',
+    data: {
+      labels: DAYS,
+      datasets: zones.map(z => ({
+        label: z.label,
+        data: z.data,
+        borderColor: z.color,
+        backgroundColor: z.color + '12',
+        borderWidth: z.label==='Zone 4L' ? 2.5 : 1.5,
+        pointRadius: z.label==='Zone 4L' ? 4 : 2,
+        fill: false,
+        tension: 0.35,
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color:'#6c7898', font:{family:'DM Sans',size:11}, boxWidth:10 } } },
+      scales: {
+        x: { grid:{color:'#1c2540'}, ticks:{color:'#6c7898',font:{family:'DM Sans'}} },
+        y: { grid:{color:'#1c2540'}, ticks:{color:'#6c7898',font:{family:'IBM Plex Mono',size:10}}, min:30, max:100,
+             title:{display:true,text:'Activity Index',color:'#384060',font:{size:10}} }
+      }
+    }
+  });
+
+  // Weight chart
+  const days18 = Array.from({length:18},(_,i)=>`D${i+1}`);
+  const std = [45,64,90,122,162,209,265,329,401,480,566,659,757,860,966,1075,1186,1299];
+  const actual = std.map((v,i) => Math.round(v*(1.012+i*0.0008)+(Math.random()-.5)*12));
+  const wCtx = document.getElementById('weight-chart').getContext('2d');
+  new Chart(wCtx, {
+    type: 'line',
+    data: {
+      labels: days18,
+      datasets: [
+        { label:'Sensor estimate', data:actual, borderColor:'#00c8e0', backgroundColor:'#00c8e018',
+          borderWidth:2.5, fill:true, tension:0.4, pointRadius:2 },
+        { label:'Ross 308 standard', data:std, borderColor:'#384060',
+          borderDash:[5,3], borderWidth:1.5, fill:false, tension:0.4, pointRadius:0 }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: { legend:{labels:{color:'#6c7898',font:{family:'DM Sans',size:11},boxWidth:10}} },
+      scales: {
+        x: { grid:{color:'#1c2540'}, ticks:{color:'#6c7898',font:{family:'DM Sans',size:10}} },
+        y: { grid:{color:'#1c2540'},
+             ticks:{color:'#6c7898',font:{family:'IBM Plex Mono',size:10},callback:v=>v+'g'},
+             title:{display:true,text:'Weight (g)',color:'#384060',font:{size:10}} }
+      }
+    }
+  });
+
+  // Clustering heatmap canvas
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const dayLabelWrap = document.getElementById('heatmap-days');
+  days.forEach(d => {
+    const s = document.createElement('div');
+    s.className='heatmap-day-label'; s.textContent=d;
+    dayLabelWrap.appendChild(s);
+  });
+  const hourWrap = document.getElementById('heatmap-hours');
+  for (let h=0;h<24;h++) {
+    const s = document.createElement('div');
+    s.className='heatmap-hour-label';
+    s.textContent = h%6===0 ? String(h).padStart(2,'0') : '';
+    hourWrap.appendChild(s);
+  }
+  const hCanvas = document.getElementById('clustering-canvas');
+  const hCtx = hCanvas.getContext('2d');
+  const cw=42, ch=12;
+  for (let d=0;d<7;d++) {
+    for (let h=0;h<24;h++) {
+      let v = 0.05 + Math.random()*0.12;
+      if (h>=2 && h<=6) v = 0.28 + (d/7)*0.45 + Math.random()*0.1;
+      if (d===6 && h>=11 && h<=12) v = 0.92;
+      if (d===5 && h>=11 && h<=12) v = 0.62;
+      const r=Math.round(v*220), g=Math.round((1-v)*80), b=Math.round((1-v)*60);
+      hCtx.fillStyle=`rgb(${r},${g},${b})`;
+      hCtx.fillRect(d*cw+0.5, h*ch+0.5, cw-1, ch-1);
+    }
+  }
+
+  // Pre-mortality grids
+  function buildGrid(id, side) {
+    const g = document.getElementById(id);
+    for (let col=0;col<6;col++) {
+      for (let row=0;row<4;row++) {
+        const idx = side*24 + row*6 + col;
+        const d = penData[idx];
+        const isAlert = idx===15;
+        const div = document.createElement('div');
+        div.id = `premort-cell-${idx}`;
+        div.className = 'pen-cell' + (isAlert ? ' monitor' : d.clustering > 0.4 ? ' alert-pen' : '');
+        if (isAlert) {
+          const badge = document.createElement('div');
+          badge.className='monitor-badge'; badge.textContent='MONITOR';
+          div.appendChild(badge);
+        }
+        const label = document.createElement('div');
+        label.className='pen-label';
+        label.textContent=`Z${col+1}R${row+1}`;
+        div.appendChild(label);
+        g.appendChild(div);
+      }
+    }
+  }
+  buildGrid('premort-grid-left',0);
+  buildGrid('premort-grid-right',1);
+}
+
+// ═══════════════════════════════════════════════
+//  OPS CHARTS & SVG LITTER MAP
+// ═══════════════════════════════════════════════
+function initOpsCharts() {
+  // Litter SVG
+  const svg = document.getElementById('litter-svg');
+  const VW=640, VH=380, PW=72, PH=57;
+  const leftX=12, rightX=372, aisleX=296, aisleW=48;
+  const topY=32, zoneH=PH;
+
+  // Background
+  svg.innerHTML = `<rect width="${VW}" height="${VH}" fill="#0f1320"/>`;
+  // Aisle
+  svg.innerHTML += `<rect x="${aisleX}" y="${topY}" width="${aisleW}" height="${6*zoneH}" fill="#151e2a" rx="2"/>`;
+  svg.innerHTML += `<text x="${aisleX+aisleW/2}" y="${topY + 3*zoneH}" dominant-baseline="middle" text-anchor="middle" fill="#2a3860" font-size="9" font-family="DM Sans" transform="rotate(-90,${aisleX+aisleW/2},${topY+3*zoneH})">CENTRAL AISLE</text>`;
+
+  // Zone labels top
+  for (let col=0; col<6; col++) {
+    const lx = leftX + 4*PW/2;
+    svg.innerHTML += `<text x="${leftX + 4*PW/2}" y="${topY + col*zoneH + zoneH/2}" dominant-baseline="middle" text-anchor="middle" fill="#384060" font-size="8" font-family="DM Sans">Z${col+1}</text>`;
+  }
+
+  function litColor(v) {
+    if (v < 0.35) {
+      const t = v/0.35;
+      return `rgb(${Math.round(21+t*10)},${Math.round(77+t*20)},${Math.round(42+t*15)})`;
+    }
+    if (v < 0.65) return `rgb(${Math.round(80+v*40)},${Math.round(60-v*30)},0)`;
+    return `rgb(${Math.round(60+v*20)},${Math.round(25)},0)`;
+  }
+  function fpdRisk(v) { return (v * 10).toFixed(1); }
+
+  // Left pens
+  for (let col=0; col<6; col++) {
+    for (let row=0; row<4; row++) {
+      const idx = row*6+col;
+      const d = penData[idx];
+      const x = leftX + row*PW;
+      const y = topY + col*zoneH;
+      const color = litColor(d.litter);
+      const risk  = parseFloat(fpdRisk(d.litter));
+      const stroke = risk > 5 ? '#f03050' : '#1c2540';
+      svg.innerHTML += `<rect id="svg-pen-${idx}" x="${x+1}" y="${y+1}" width="${PW-2}" height="${zoneH-2}" fill="${color}" stroke="${stroke}" stroke-width="${risk>5?1.5:0.5}" rx="2"/>`;
+      if (risk > 5) {
+        svg.innerHTML += `<text x="${x+PW/2}" y="${y+zoneH/2-5}" dominant-baseline="middle" text-anchor="middle" fill="#f03050" font-size="11" font-family="IBM Plex Mono" font-weight="600">${risk.toFixed(1)}</text>`;
+        svg.innerHTML += `<text x="${x+PW/2}" y="${y+zoneH/2+7}" dominant-baseline="middle" text-anchor="middle" fill="#f03050" font-size="8" font-family="DM Sans">FPD risk</text>`;
+      }
+    }
+  }
+  // Right pens
+  for (let col=0; col<6; col++) {
+    for (let row=0; row<4; row++) {
+      const idx = 24 + row*6+col;
+      const d = penData[idx];
+      const x = rightX + row*PW;
+      const y = topY + col*zoneH;
+      const color = litColor(d.litter);
+      const risk  = parseFloat(fpdRisk(d.litter));
+      const stroke = risk > 5 ? '#f03050' : '#1c2540';
+      svg.innerHTML += `<rect id="svg-pen-${idx}" x="${x+1}" y="${y+1}" width="${PW-2}" height="${zoneH-2}" fill="${color}" stroke="${stroke}" stroke-width="${risk>5?1.5:0.5}" rx="2"/>`;
+      if (risk > 5) {
+        svg.innerHTML += `<text x="${x+PW/2}" y="${y+zoneH/2-5}" dominant-baseline="middle" text-anchor="middle" fill="#f03050" font-size="11" font-family="IBM Plex Mono" font-weight="600">${risk.toFixed(1)}</text>`;
+        svg.innerHTML += `<text x="${x+PW/2}" y="${y+zoneH/2+7}" dominant-baseline="middle" text-anchor="middle" fill="#f03050" font-size="8" font-family="DM Sans">FPD risk</text>`;
+      }
+    }
+  }
+  // Column labels (zone numbers on left)
+  for (let col=0; col<6; col++) {
+    svg.innerHTML += `<text x="4" y="${topY + col*zoneH + zoneH/2}" dominant-baseline="middle" fill="#384060" font-size="9" font-family="DM Sans">Z${col+1}</text>`;
+    svg.innerHTML += `<text x="${VW-5}" y="${topY + col*zoneH + zoneH/2}" dominant-baseline="middle" text-anchor="end" fill="#384060" font-size="9" font-family="DM Sans">Z${col+1}</text>`;
+  }
+  // Side labels
+  svg.innerHTML += `<text x="${leftX+2*PW}" y="${topY-10}" text-anchor="middle" fill="#384060" font-size="10" font-family="DM Sans" letter-spacing="1">LEFT SIDE</text>`;
+  svg.innerHTML += `<text x="${rightX+2*PW}" y="${topY-10}" text-anchor="middle" fill="#384060" font-size="10" font-family="DM Sans" letter-spacing="1">RIGHT SIDE</text>`;
+
+  // T+RH Chart
+  const labels48 = [];
+  for (let i=0;i<48;i++) {
+    const h=Math.floor(i/2), m=i%2===0?'00':'30';
+    if(i%8===0) labels48.push(`${String(h).padStart(2,'0')}:${m}`); else labels48.push('');
+  }
+  const mkTemp = (base, amp, phase, noise) =>
+    Array.from({length:48},(_,i)=>parseFloat((base + Math.sin(i*0.13+phase)*amp + (Math.random()-.5)*noise).toFixed(2)));
+  const mkHumid = (base, amp, phase, spike, sStart, sEnd) =>
+    Array.from({length:48},(_,i)=>{
+      let v = base + Math.sin(i*0.13+phase)*amp;
+      if (i>=sStart && i<=sEnd) v += (i-sStart)*spike;
+      return parseFloat(Math.min(92,v+(Math.random()-.5)*1.5).toFixed(1));
+    });
+
+  const tZ1 = mkTemp(28.8,1.1,0,0.3);
+  const tZ2 = mkTemp(29.5,0.9,0.6,0.3);
+  const tZ4 = mkTemp(31.8,0.7,1.4,0.3);
+  const hZ2 = mkHumid(68,4,0.5, 2, 28, 38);
+  const hZ4 = mkHumid(72,5,1.2, 1.8, 14, 26);
+
+  const trhCtx = document.getElementById('trh-chart').getContext('2d');
+  new Chart(trhCtx, {
+    type: 'line',
+    data: {
+      labels: labels48,
+      datasets: [
+        { label:'Zone 1 Temp', data:tZ1, borderColor:'#4080ff', borderWidth:1.5, fill:false, tension:0.4, yAxisID:'temp', pointRadius:0 },
+        { label:'Zone 2 Temp', data:tZ2, borderColor:'#28d472', borderWidth:1.5, fill:false, tension:0.4, yAxisID:'temp', pointRadius:0 },
+        { label:'Zone 4 Temp', data:tZ4, borderColor:'#f03050', borderWidth:2,   fill:false, tension:0.4, yAxisID:'temp', pointRadius:0 },
+        { label:'Zone 2 RH',   data:hZ2, borderColor:'#e8930a', borderDash:[4,2], borderWidth:1.5, fill:false, tension:0.4, yAxisID:'humid', pointRadius:0 },
+        { label:'Zone 4 RH',   data:hZ4, borderColor:'#9050ff', borderDash:[4,2], borderWidth:1.5, fill:false, tension:0.4, yAxisID:'humid', pointRadius:0 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{labels:{color:'#6c7898',font:{family:'DM Sans',size:10},boxWidth:8}} },
+      scales:{
+        x:{ grid:{color:'#1c2540'}, ticks:{color:'#6c7898',font:{family:'IBM Plex Mono',size:9},maxRotation:0} },
+        temp:{ type:'linear', position:'left', grid:{color:'#1c2540'},
+               ticks:{color:'#6c7898',font:{family:'IBM Plex Mono',size:10},callback:v=>v.toFixed(1)+'°'},
+               min:26, max:35, title:{display:true,text:'Temp (°C)',color:'#384060',font:{size:10}} },
+        humid:{ type:'linear', position:'right', grid:{drawOnChartArea:false},
+                ticks:{color:'#9050ff',font:{family:'IBM Plex Mono',size:10},callback:v=>v+'%'},
+                min:50, max:95, title:{display:true,text:'RH (%)',color:'#384060',font:{size:10}} }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  AI CHAT — MAIN TAB
+// ═══════════════════════════════════════════════
+const aiResponses = {
+  fpd: `Based on current backscatter readings, footpad dermatitis risk scores across all zones:\n\nZone 2R: 6.2 / 10 — WARNING. Sustained litter saturation for 3+ days. Intervention recommended within 24h.\nZone 4L: 4.8 / 10 — WATCH. Combined with clustering alert, risk trajectory is concerning.\nAll other zones: 1.2 – 3.4 — within acceptable range for Day 18.\n\nFPD risk scores are updated every 10 minutes. Next assessment: 18:10.`,
+  compare: `Comparing Zone 4L activity at Day 18 across last 4 flocks:\n\nFlock 9 (current):  48  ← BELOW HISTORICAL MINIMUM\nFlock 8:            79  (normal)\nFlock 7:            82  (normal)\nFlock 6:            74  (normal)\n\nThe current reading is 37% below the 3-flock average of 78.3. This is the lowest recorded Day 18 activity for Zone 4L in the PRF Shed A dataset. Historical precedent strongly suggests an active health event.`,
+  avoidance: `Three avoidance zones detected in last 24h:\n\nZone 5R Row 2 — Density 28% below baseline (04:00–07:00). RESOLVED after feeder inspection.\nZone 1L Row 4 — Mild density deficit (-18%) throughout afternoon. Possible heat stress from solar exposure.\nZone 6R Row 1 — Persistent low density correlated with elevated temperature (32.7°C). Birds avoiding hot zone.\n\nAvoidance detection threshold: >25% below per-zone average density for >30 minutes.`,
+  report: `WEEKLY RESEARCH LOG SUMMARY — PRF Shed A — Flock Day 18\nDate: June 6, 2026\n\nFLOCK STATUS: CONCERN — Active health event Zone 4L\nAVG ACTIVITY: 84/100 (6-zone mean) | Zone 4L: 48 ⚠\nLITTER CONDITION: 78% friable / 16% saturated / 6% caked\nWEIGHT PROXY: ~905g vs Ross 308 standard 890g (+1.7%)\nTEMP RANGE: 28.1°C – 32.7°C | Zone 6R approaching limit\n\nALERTS THIS WEEK: 7 total (2 critical, 3 warning, 2 info)\nFPD RISK ZONES: 2R (6.2/10), 4L (4.8/10)\n\nACTION ITEMS: (1) Zone 4L walkthrough — urgent (2) Drinker inspection Zone 2R (3) Ventilation check Zone 6R`,
+  default: `I don't have a specific pre-loaded answer for that question, but in a real deployment I would query the live sensor database and return zone-specific data with full trend analysis. Try one of the suggested questions on the right for a detailed response.`
+};
+
+function getAIResponse(q) {
+  q = q.toLowerCase();
+  if (q.includes('fpd') || q.includes('footpad')) return aiResponses.fpd;
+  if (q.includes('compare') || q.includes('previous') || q.includes('flock')) return aiResponses.compare;
+  if (q.includes('avoidance') || q.includes('avoiding')) return aiResponses.avoidance;
+  if (q.includes('report') || q.includes('summary') || q.includes('log')) return aiResponses.report;
+  return aiResponses.default;
+}
+
+function appendMainMsg(role, text) {
+  const msgs = document.getElementById('ai-messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'ai-msg ' + role;
+  const sender = document.createElement('span');
+  sender.className = 'msg-sender';
+  sender.textContent = role === 'user' ? 'YOU' : 'FLOCKSENSE AI';
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.style.whiteSpace = 'pre-wrap';
+  bubble.textContent = text;
+  wrap.appendChild(sender);
+  wrap.appendChild(bubble);
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+document.getElementById('ai-main-send').addEventListener('click', () => {
+  const inp = document.getElementById('ai-main-input');
+  const q = inp.value.trim();
+  if (!q) return;
+  inp.value = '';
+  appendMainMsg('user', q);
+  setTimeout(() => {
+    appendMainMsg('assistant', getAIResponse(q));
+  }, 900);
+});
+document.getElementById('ai-main-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('ai-main-send').click();
+});
+document.querySelectorAll('.quick-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.getElementById('ai-main-input').value = chip.dataset.q;
+    document.getElementById('ai-main-send').click();
+  });
+});
+
+// ═══════════════════════════════════════════════
+//  FLOATING AI BUBBLE
+// ═══════════════════════════════════════════════
+const bubble = document.getElementById('ai-bubble');
+const floatPanel = document.getElementById('ai-float-panel');
+document.getElementById('afp-close').addEventListener('click', () => floatPanel.classList.remove('open'));
+bubble.addEventListener('click', () => floatPanel.classList.toggle('open'));
+
+const afpResponses = {
+  'current flock status?': 'All metrics nominal except Zone 4L (activity 48 ↓, clustering 0.92) and Zone 2R (litter index 0.72). 3 active alerts. Flock weight +1.7% above breed standard.',
+  'any urgent alerts?': '1 CRITICAL: Zone 4L clustering detected at 11:42 (intensity 0.92). Walkthrough recommended urgently.\n2 WARNINGS: Zone 2R litter saturation (FPD risk 6.2) · Zone 6R temperature 32.7°C.',
+  "today's weight estimate?": 'Current flock weight estimate: ~905g average across all 48 pens. Ross 308 standard at Day 18: 890g. You are +1.7% above breed curve — on track.',
+};
+
+function appendFloat(role, text) {
+  const msgs = document.getElementById('afp-messages');
+  const div = document.createElement('div');
+  div.className = 'afp-msg ' + role;
+  div.style.whiteSpace = 'pre-wrap';
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('afp-messages');
+  const div = document.createElement('div');
+  div.className = 'afp-msg assistant typing-indicator';
+  div.id = 'afp-typing';
+  div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function removeTyping() {
+  const t = document.getElementById('afp-typing');
+  if (t) t.remove();
+}
+
+function afpQuery(q) {
+  appendFloat('user', q);
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    const k = Object.keys(afpResponses).find(k => q.toLowerCase().includes(k.toLowerCase().slice(0,-1)));
+    appendFloat('assistant', k ? afpResponses[k] : getAIResponse(q));
+  }, 1100);
+}
+
+document.querySelectorAll('.afp-chip').forEach(chip => {
+  chip.addEventListener('click', () => afpQuery(chip.textContent));
+});
+document.getElementById('afp-send').addEventListener('click', () => {
+  const inp = document.getElementById('afp-input');
+  const q = inp.value.trim();
+  if (!q) return;
+  inp.value = '';
+  afpQuery(q);
+});
+document.getElementById('afp-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('afp-send').click();
+});
+
+// ═══════════════════════════════════════════════
+//  LIVE DATA — FlockSense API
+// ═══════════════════════════════════════════════
+// Maps real RPi node IDs to pen indices in the 3D shed model.
+// Node 1 -> Zone 1L Row 1 (idx 0), Node 2 -> Zone 1R Row 1 (idx 24)
+const LIVE_NODE_PEN_MAP = { node1: 0, node2: 24 };
+
+// Backend API — same FastAPI service that ingests RPi sensor readings.
+const API_BASE = 'https://flocksense-api-production.up.railway.app';
+
+async function fetchLiveData() {
+  try {
+    const res = await fetch(`${API_BASE}/api/pens/latest`);
+    if (!res.ok) return;
+    const rows = await res.json();
+
+    rows.forEach(row => {
+      const idx = LIVE_NODE_PEN_MAP[row.node_id];
+      if (idx !== undefined && penData[idx]) {
+        const d = penData[idx];
+        if (row.activity_score != null) d.activity = row.activity_score;
+        if (row.clustering_score != null) d.clustering = row.clustering_score;
+        if (row.temperature != null) d.temp = row.temperature;
+        if (row.humidity != null) d.humidity = row.humidity;
+        if (row.bird_count != null) d.birdCount = row.bird_count;
+      }
+
+      const img = document.getElementById('camera-' + row.node_id);
+      if (img && row.camera_url) {
+        img.src = row.camera_url + '?t=' + Date.now();
+      }
+    });
+
+    if (typeof window.updateLayer === 'function') {
+      const activeBtn = document.querySelector('.layer-btn.active');
+      window.updateLayer(activeBtn ? activeBtn.dataset.layer : 'activity');
+    }
+  } catch (e) {
+    console.warn('[live data] fetch failed', e);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  initThreeJS();
+  drawSparkline('spark-activity', [72,75,78,76,80,82,84], '#28d472');
+  drawDonut('donut-litter', [78,16,6], ['#28d472','#d97706','#7c3a0a']);
+  tabInitialized['dashboard'] = true;
+
+  fetchLiveData();
+  setInterval(fetchLiveData, 10000);
+});
+</script>
+</body>
+</html>
