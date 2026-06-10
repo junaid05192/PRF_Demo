@@ -280,6 +280,14 @@ body.real-mode .real-only.grid{display:grid;}
 /* ── SECTION HEADER ── */
 .section-header{display:flex;align-items:center;gap:10px;margin-bottom:2px;}
 .section-tag{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--cyan);background:rgba(0,200,224,.08);border:1px solid rgba(0,200,224,.2);padding:2px 7px;border-radius:3px;}
+
+/* ── IMAGE LIGHTBOX ── */
+#img-lightbox{display:none;position:fixed;inset:0;background:rgba(5,8,14,.88);z-index:1000;align-items:center;justify-content:center;padding:40px;}
+#img-lightbox.open{display:flex;}
+#img-lightbox img{max-width:100%;max-height:100%;border-radius:6px;border:1px solid var(--border-hi);box-shadow:0 8px 40px rgba(0,0,0,.6);}
+.lightbox-actions{position:absolute;top:18px;right:24px;display:flex;gap:10px;}
+.lightbox-btn{background:rgba(20,26,40,.85);border:1px solid var(--border-hi);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:8px 14px;border-radius:5px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.lightbox-btn:hover{background:rgba(40,50,72,.9);border-color:var(--cyan);}
 </style>
 </head>
 <body>
@@ -351,7 +359,7 @@ body.real-mode .real-only.grid{display:grid;}
         <div class="kpi-label" id="camera-label">Live Camera Feed</div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
           <div>
-            <img id="camera-node1" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;border:1px solid var(--border);background:var(--bg-s2);">
+            <img id="camera-node1" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;border:1px solid var(--border);background:var(--bg-s2);cursor:pointer;">
             <div class="kpi-sub" id="camera-no-sensor" style="display:none;padding:14px 0;text-align:center;">No camera deployed for this pen</div>
           </div>
         </div>
@@ -721,6 +729,15 @@ Day 18  →  Activity index: 48  ⚠ SIGNIFICANTLY BELOW NORMAL</div>
 
 <!-- TOOLTIP -->
 <div id="three-tooltip"></div>
+
+<!-- IMAGE LIGHTBOX -->
+<div id="img-lightbox">
+  <div class="lightbox-actions">
+    <a class="lightbox-btn" id="lightbox-download" download="camera-frame.jpg">Download</a>
+    <button class="lightbox-btn" id="lightbox-close">Close ✕</button>
+  </div>
+  <img id="lightbox-img" src="" alt="Camera frame">
+</div>
 
 <!-- FLOATING AI BUBBLE -->
 <div id="ai-bubble">💬</div>
@@ -1854,6 +1871,62 @@ function applyMode(mode) {
 document.getElementById('mode-switch').addEventListener('click', () => {
   applyMode(window.REAL_MODE ? 'dummy' : 'real');
 });
+
+// ═══════════════════════════════════════════════
+//  IMAGE LIGHTBOX
+// ═══════════════════════════════════════════════
+(function () {
+  const lightbox = document.getElementById('img-lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const lightboxDownload = document.getElementById('lightbox-download');
+  const closeBtn = document.getElementById('lightbox-close');
+
+  function openLightbox(img) {
+    if (!img.src) return;
+    lightboxImg.src = img.src;
+    lightboxDownload.dataset.src = img.src;
+    lightbox.classList.add('open');
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    lightboxImg.src = '';
+  }
+
+  document.body.addEventListener('click', (e) => {
+    const img = e.target.closest('#camera-node1');
+    if (img) openLightbox(img);
+  });
+
+  // Fetch as a blob so the download attribute works for cross-origin image URLs.
+  lightboxDownload.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const src = lightboxDownload.dataset.src;
+    if (!src) return;
+    try {
+      const res = await fetch(src);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `camera-frame-${Date.now()}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      window.open(src, '_blank');
+    }
+  });
+
+  closeBtn.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+  });
+})();
 
 // ═══════════════════════════════════════════════
 //  INIT
