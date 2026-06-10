@@ -44,6 +44,22 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
 .nav-tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--cyan);border-radius:2px 2px 0 0;}
 .nav-tab.disabled{opacity:.3;cursor:not-allowed;pointer-events:none;}
 .nav-right{display:flex;align-items:center;gap:12px;margin-left:auto;}
+.mode-toggle{display:flex;align-items:center;gap:8px;}
+.mode-toggle-label{font-size:11px;color:var(--text-2);font-weight:500;letter-spacing:.3px;white-space:nowrap;}
+.mode-switch{position:relative;width:38px;height:20px;background:var(--bg-s2);border:1px solid var(--border-hi);border-radius:20px;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.mode-switch::before{content:'';position:absolute;top:1px;left:1px;width:16px;height:16px;border-radius:50%;background:var(--text-2);transition:all .2s;}
+.mode-switch.on{background:rgba(40,212,114,.15);border-color:var(--green);}
+.mode-switch.on::before{transform:translateX(18px);background:var(--green);}
+
+/* ── REAL / DUMMY MODE ── */
+.real-only{display:none;}
+body.real-mode .demo-only{display:none!important;}
+body.real-mode .real-only{display:flex;}
+body.real-mode .real-only.block{display:block;}
+body.real-mode .real-only.grid{display:grid;}
+.real-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;color:var(--text-2);text-align:center;padding:40px;}
+.real-placeholder .rp-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);}
+.real-placeholder .rp-sub{font-size:12px;max-width:420px;line-height:1.6;}
 .shed-select{background:var(--bg-s2);border:1px solid var(--border-hi);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 10px;border-radius:4px;cursor:pointer;outline:none;}
 .flock-badge{background:rgba(0,200,224,.12);border:1px solid rgba(0,200,224,.3);color:var(--cyan);font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;letter-spacing:.5px;}
 .nav-clock{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-2);letter-spacing:.5px;}
@@ -273,7 +289,11 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
       <option>PRF Shed B</option>
       <option>PRF Shed C</option>
     </select>
-    <span class="flock-badge">DAY 18 · ROSS 308</span>
+    <span class="flock-badge demo-only">DAY 18 · ROSS 308</span>
+    <div class="mode-toggle">
+      <span class="mode-toggle-label" id="mode-label">Demo Mode</span>
+      <div class="mode-switch" id="mode-switch" title="Toggle between demo storyline and live sensor data"></div>
+    </div>
     <span class="nav-clock" id="nav-clock">00:00:00</span>
   </div>
 </nav>
@@ -285,14 +305,14 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
       <div class="layer-bar">
         <span class="layer-bar-label">Layer</span>
         <button class="layer-btn active" data-layer="activity">Activity</button>
-        <button class="layer-btn" data-layer="litter">Litter</button>
+        <button class="layer-btn demo-only" data-layer="litter">Litter</button>
         <button class="layer-btn" data-layer="temperature">Temperature</button>
         <button class="layer-btn" data-layer="humidity">Humidity</button>
         <button class="layer-btn" data-layer="clustering">Clustering</button>
-        <div class="layer-sep"></div>
-        <button class="layer-btn" data-layer="welfare">Welfare Index <span class="beta-badge">BETA</span></button>
-        <button class="layer-btn" data-layer="fcr">FCR <span class="beta-badge">BETA</span></button>
-        <button class="layer-btn" data-layer="weight">Approx. Weight <span class="beta-badge">BETA</span></button>
+        <div class="layer-sep demo-only"></div>
+        <button class="layer-btn demo-only" data-layer="welfare">Welfare Index <span class="beta-badge">BETA</span></button>
+        <button class="layer-btn demo-only" data-layer="fcr">FCR <span class="beta-badge">BETA</span></button>
+        <button class="layer-btn demo-only" data-layer="weight">Approx. Weight <span class="beta-badge">BETA</span></button>
         <span style="margin-left:auto;font-size:10px;color:var(--text-3);">Drag to rotate · Scroll to zoom</span>
       </div>
       <div id="shed-container"></div>
@@ -313,12 +333,8 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
         <div class="kpi-label">Live Camera Feeds</div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
           <div>
-            <div style="font-size:10px;color:var(--text-2);margin-bottom:3px;">Node 1 — Pen A</div>
+            <div style="font-size:10px;color:var(--text-2);margin-bottom:3px;">Node 1 — Zone 3L</div>
             <img id="camera-node1" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;border:1px solid var(--border);background:var(--bg-s2);">
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--text-2);margin-bottom:3px;">Node 2 — Pen B</div>
-            <img id="camera-node2" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;border:1px solid var(--border);background:var(--bg-s2);">
           </div>
         </div>
       </div>
@@ -327,15 +343,16 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
       <div class="kpi-card">
         <div class="kpi-label">Flock Activity Index</div>
         <div style="display:flex;align-items:baseline;gap:10px;">
-          <div class="kpi-value" style="color:var(--green)">84</div>
-          <span class="kpi-trend trend-up">↑ +3</span>
+          <div class="kpi-value" id="kpi-activity-value" style="color:var(--green)">84</div>
+          <span class="kpi-trend trend-up demo-only">↑ +3</span>
         </div>
-        <div class="kpi-sub">Avg across 48 pens · updated 60s</div>
-        <canvas class="kpi-spark" id="spark-activity" height="28"></canvas>
+        <div class="kpi-sub demo-only">Avg across 48 pens · updated 60s</div>
+        <div class="kpi-sub real-only">Zone 3L · Node 1 · live</div>
+        <canvas class="kpi-spark demo-only" id="spark-activity" height="28"></canvas>
       </div>
 
       <!-- KPI 2: Litter -->
-      <div class="kpi-card">
+      <div class="kpi-card demo-only">
         <div class="kpi-label">Litter Condition</div>
         <div class="donut-wrap">
           <canvas class="donut-canvas" id="donut-litter" width="60" height="60"></canvas>
@@ -350,16 +367,18 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
       <!-- KPI 3: Temperature -->
       <div class="kpi-card">
         <div class="kpi-label">Shed Temperature</div>
-        <div class="range-avg">29.4<span style="font-size:16px;font-weight:400;color:var(--text-2)">°C</span></div>
-        <div class="kpi-sub">Shed average · 12 zones</div>
-        <div class="range-bar">
+        <div class="range-avg" id="kpi-temp-value">29.4<span style="font-size:16px;font-weight:400;color:var(--text-2)">°C</span></div>
+        <div class="kpi-sub demo-only">Shed average · 12 zones</div>
+        <div class="kpi-sub real-only">Zone 3L · Node 1 · live</div>
+        <div class="range-bar demo-only">
           <div class="range-track"><div class="range-fill" style="left:12%;right:18%"></div></div>
           <div class="range-ends"><span>28.1°C</span><span>32.7°C</span></div>
         </div>
+        <div class="kpi-sub real-only" style="margin-top:6px;">Humidity: <span id="kpi-humidity-value" style="font-family:'IBM Plex Mono',monospace;color:var(--text)">—</span></div>
       </div>
 
       <!-- KPI 4: Weight -->
-      <div class="kpi-card">
+      <div class="kpi-card demo-only">
         <div class="kpi-label">Weight Proxy</div>
         <div style="display:flex;align-items:baseline;gap:10px;">
           <div class="kpi-value" style="color:var(--cyan);font-size:30px;">~905<span style="font-size:14px;font-weight:400;color:var(--text-2)">g</span></div>
@@ -369,7 +388,7 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
       </div>
 
       <!-- KPI 5: Alerts -->
-      <div class="kpi-card" style="border-color:rgba(240,48,80,.3);">
+      <div class="kpi-card demo-only" style="border-color:rgba(240,48,80,.3);">
         <div class="kpi-label">Active Alerts</div>
         <div class="alerts-count">3</div>
         <div class="alert-breakdown">
@@ -377,6 +396,13 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
           <div class="ab-item"><div class="ab-dot" style="background:var(--amber)"></div><span>1 Warning &mdash; Litter Zone 2R</span></div>
           <div class="ab-item"><div class="ab-dot" style="background:var(--blue)"></div><span>1 Info &mdash; Temp Zone 6R</span></div>
         </div>
+      </div>
+
+      <!-- KPI 5b: Alerts (real mode) -->
+      <div class="kpi-card real-only block">
+        <div class="kpi-label">Active Alerts</div>
+        <div class="alerts-count" style="color:var(--green)">0</div>
+        <div class="kpi-sub" style="margin-top:6px;">No active alerts · monitoring Zone 3L (Node 1)</div>
       </div>
 
     </div>
@@ -387,7 +413,7 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
     <span class="timeline-label" style="white-space:nowrap">00:00</span>
     <button class="play-btn" id="play-btn">▶</button>
     <div class="timeline-track">
-      <div class="timeline-events">
+      <div class="timeline-events demo-only">
         <div class="t-marker warning" style="left:29.2%" title="07:00 — Litter moisture rising Zone 2R"></div>
         <div class="t-marker critical" style="left:48.8%" title="11:42 — Clustering alert Zone 4L"></div>
         <div class="t-marker info" style="left:54.5%" title="13:05 — Temp approaching limit Zone 6R"></div>
@@ -399,7 +425,7 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
   </div>
 
   <!-- ALERTS -->
-  <div class="alerts-wrap">
+  <div class="alerts-wrap demo-only">
     <div class="alert-card critical">
       <div class="alert-top">
         <span class="alert-badge">CRITICAL</span>
@@ -428,11 +454,24 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
       <button class="alert-btn">Dismiss</button>
     </div>
   </div>
+  <div class="alerts-wrap real-only">
+    <div class="alert-card info" style="border-left-color:var(--green);background:rgba(40,212,114,.06);">
+      <div class="alert-top">
+        <span class="alert-badge" style="background:rgba(40,212,114,.2);color:var(--green);">OK</span>
+        <span class="alert-zone">Zone 3L — Node 1</span>
+      </div>
+      <div class="alert-msg">No active alerts · live sensor data nominal</div>
+    </div>
+  </div>
 </div>
 
 <!-- TAB 2: BIRD HEALTH -->
 <div id="tab-birdhealth" class="tab-panel">
-  <div class="bh-layout">
+  <div class="real-placeholder real-only">
+    <div class="rp-title">Live data only</div>
+    <div class="rp-sub">Bird health analytics (activity trends, weight curves, clustering heatmaps, mortality risk) require historical data across multiple zones. Only Zone 3L (Node 1) is currently deployed and reporting live mmWave data — switch to Demo Mode to see the full storyline.</div>
+  </div>
+  <div class="bh-layout demo-only">
 
     <!-- Activity trend -->
     <div class="chart-card">
@@ -494,7 +533,11 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
 
 <!-- TAB 3: SHED OPERATIONS -->
 <div id="tab-operations" class="tab-panel">
-  <div class="ops-layout">
+  <div class="real-placeholder real-only">
+    <div class="rp-title">Live data only</div>
+    <div class="rp-sub">Litter substrate mapping, ventilation fault logs, and shed-wide temperature/humidity trends require sensors across all zones. Only Zone 3L (Node 1) is currently deployed and reporting live data — switch to Demo Mode to see the full storyline.</div>
+  </div>
+  <div class="ops-layout demo-only">
 
     <div class="ops-top">
       <!-- Litter Map -->
@@ -579,12 +622,17 @@ nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;backgroun
     <div class="ai-chat-main">
       <div class="ai-messages" id="ai-messages">
 
-        <div class="ai-msg user">
+        <div class="ai-msg assistant real-only">
+          <span class="msg-sender">FLOCKSENSE AI</span>
+          <div class="msg-bubble">Hi! Live Data Only mode is active — I currently have live mmWave data from <strong>Node 1 (Zone 3L)</strong> only. Ask me about activity, clustering, temperature or humidity for that zone.</div>
+        </div>
+
+        <div class="ai-msg user demo-only">
           <span class="msg-sender">YOU</span>
           <div class="msg-bubble">Which zones had elevated litter moisture this week?</div>
         </div>
 
-        <div class="ai-msg assistant">
+        <div class="ai-msg assistant demo-only">
           <span class="msg-sender">FLOCKSENSE AI</span>
           <div class="msg-bubble">Based on backscatter intensity readings over the past 7 days, two zones show elevated moisture above the 35% threshold:<br><br>
           <strong>Zone 2R</strong> (right side): Moisture index trending upward since Day 15, now reading 0.72 on the 0–1 backscatter scale (~38% estimated moisture). Progression suggests a drinker line issue or localised crowding near water access. FPD risk score is currently <strong style="color:var(--amber)">6.2 / 10</strong>.<br><br>
@@ -594,12 +642,12 @@ If leak confirmed: partial litter removal + replacement recommended.
 FPD risk will escalate above 7.0 within ~36h if untreated.</div>
         </div>
 
-        <div class="ai-msg user">
+        <div class="ai-msg user demo-only">
           <span class="msg-sender">YOU</span>
           <div class="msg-bubble">Is the activity drop in Zone 4L something to worry about?</div>
         </div>
 
-        <div class="ai-msg assistant">
+        <div class="ai-msg assistant demo-only">
           <span class="msg-sender">FLOCKSENSE AI</span>
           <div class="msg-bubble">The Zone 4L activity trend warrants close attention. The decline has been sustained and accelerating over 4 days:</div>
           <div class="msg-data">Day 14  →  Activity index: 80  (normal range Day 14 Ross 308)
@@ -623,19 +671,31 @@ Day 18  →  Activity index: 48  ⚠ SIGNIFICANTLY BELOW NORMAL</div>
     </div>
     <div class="ai-sidebar">
       <div class="ai-sidebar-title">Quick Insights</div>
-      <div class="quick-chips">
+      <div class="quick-chips demo-only">
         <button class="quick-chip" data-q="What is the current footpad dermatitis risk across all zones?">What is the current FPD risk across all zones?</button>
         <button class="quick-chip" data-q="Compare today's flock activity to the previous 3 flocks at Day 18.">Compare today's activity to previous flocks at Day 18</button>
         <button class="quick-chip" data-q="Which zones show avoidance behaviour and what could be causing it?">Which zones show avoidance behaviour?</button>
         <button class="quick-chip" data-q="Generate a summary report for this flock week for the research log.">Generate weekly research log summary</button>
       </div>
-      <div class="ai-sys-info">
+      <div class="quick-chips real-only">
+        <button class="quick-chip" data-q="What is the current activity level in Zone 3L?">What is the current activity level in Zone 3L?</button>
+        <button class="quick-chip" data-q="What is the current temperature and humidity in Zone 3L?">Current temperature & humidity in Zone 3L?</button>
+        <button class="quick-chip" data-q="Is there any clustering detected in Zone 3L?">Is there any clustering detected in Zone 3L?</button>
+      </div>
+      <div class="ai-sys-info demo-only">
         <strong style="color:var(--text-2)">System status</strong><br>
         mmWave nodes: <span style="color:var(--green)">6/6 online</span><br>
         T+RH sensors: <span style="color:var(--green)">12/12 online</span><br>
         Last sync: <span style="color:var(--text)">18:00:14</span><br>
         Data rate: <span style="color:var(--text)">2 fps · 48 pens</span><br>
         Edge compute: <span style="color:var(--green)">RPi4 nominal</span>
+      </div>
+      <div class="ai-sys-info real-only block">
+        <strong style="color:var(--text-2)">System status</strong><br>
+        mmWave nodes: <span style="color:var(--green)">1/1 online</span> (Node 1 · Zone 3L)<br>
+        T+RH sensors: <span style="color:var(--green)">1/1 online</span> (Node 1 · Zone 3L)<br>
+        Camera: <span style="color:var(--green)">1/1 online</span><br>
+        Edge compute: <span style="color:var(--green)">RPi nominal</span>
       </div>
     </div>
   </div>
@@ -653,12 +713,18 @@ Day 18  →  Activity index: 48  ⚠ SIGNIFICANTLY BELOW NORMAL</div>
     <button class="afp-close" id="afp-close">✕</button>
   </div>
   <div class="afp-messages" id="afp-messages">
-    <div class="afp-msg assistant">Hi! I'm monitoring your flock live. Zone 4L has an active clustering alert. Ask me anything about the shed.</div>
+    <div class="afp-msg assistant demo-only">Hi! I'm monitoring your flock live. Zone 4L has an active clustering alert. Ask me anything about the shed.</div>
+    <div class="afp-msg assistant real-only block">Hi! Live Data Only mode is active. I have live data from Node 1 (Zone 3L). Ask me anything about that zone.</div>
   </div>
-  <div class="afp-chips">
+  <div class="afp-chips demo-only">
     <button class="afp-chip">Current flock status?</button>
     <button class="afp-chip">Any urgent alerts?</button>
     <button class="afp-chip">Today's weight estimate?</button>
+  </div>
+  <div class="afp-chips real-only">
+    <button class="afp-chip">Zone 3L activity?</button>
+    <button class="afp-chip">Any urgent alerts?</button>
+    <button class="afp-chip">Zone 3L temperature?</button>
   </div>
   <div class="afp-input-row">
     <input class="afp-input" id="afp-input" placeholder="Ask anything…" type="text">
@@ -667,6 +733,10 @@ Day 18  →  Activity index: 48  ⚠ SIGNIFICANTLY BELOW NORMAL</div>
 </div>
 
 <script>
+// Pen indices with a real deployed sensor node (Zone 3L, all 4 rows — Node 1)
+const DEPLOYED_PEN_IDXS = [2, 8, 14, 20];
+window.REAL_MODE = false;
+
 // ═══════════════════════════════════════════════
 //  SIMULATED DATA
 // ═══════════════════════════════════════════════
@@ -900,6 +970,9 @@ function initThreeJS() {
     return ((Math.round(r1+(r2-r1)*t)<<16)|(Math.round(g1+(g2-g1)*t)<<8)|Math.round(b1+(b2-b1)*t));
   }
   function penColor(layer, idx) {
+    if (window.REAL_MODE && !DEPLOYED_PEN_IDXS.includes(idx)) {
+      return 0x262d40; // no deployment / no live data — greyed out
+    }
     const d = penData[idx];
     if (layer === 'activity') {
       const a = d.activity / 100;
@@ -962,9 +1035,13 @@ function initThreeJS() {
     penMeshes.forEach((m, i) => m.material.color.setHex(penColor(layer, i)));
     document.querySelectorAll('.layer-btn').forEach(b => b.classList.toggle('active', b.dataset.layer === layer));
     const lg = legends[layer];
-    document.getElementById('shed-legend').innerHTML = [0,1,2].map(i =>
+    let html = [0,1,2].map(i =>
       `<div class="legend-item"><div class="legend-dot" style="background:${lg[3+i]}"></div><span>${lg[i]}</span></div>`
     ).join('');
+    if (window.REAL_MODE) {
+      html += `<div class="legend-item"><div class="legend-dot" style="background:#262d40"></div><span>No live sensor</span></div>`;
+    }
+    document.getElementById('shed-legend').innerHTML = html;
   }
   window.updateLayer = updateLayer;
   updateLayer('activity');
@@ -992,17 +1069,24 @@ function initThreeJS() {
       if (obj.userData.label) {
         tip.textContent = obj.userData.label;
       } else if (obj.userData.penIdx !== undefined) {
-        const d = penData[obj.userData.penIdx];
-        const side = obj.userData.penIdx < 24 ? 'L' : 'R';
-        const li = obj.userData.penIdx % 24;
+        const idx = obj.userData.penIdx;
+        const d = penData[idx];
+        const side = idx < 24 ? 'L' : 'R';
+        const li = idx % 24;
         const zone = li % 6 + 1, row = Math.floor(li / 6) + 1;
-        const ls = d.litter < 0.35 ? 'Friable' : d.litter < 0.65 ? 'Saturated' : 'Caked';
-        const layerExtra = {
-          welfare:     `  ·  Welfare: ${d.welfare}/100`,
-          fcr:         `  ·  FCR: ${d.fcr}  ·  ${d.fcr < 1.5 ? '✓ Efficient' : d.fcr < 1.7 ? '⚠ Watch' : '✗ Poor'}`,
-          weight:      `  ·  Weight: ~${d.weight}g  ·  Std: 890g  ·  ${d.weight >= 890 ? '+' : ''}${d.weight - 890}g`,
-        }[currentLayer] || '';
-        tip.textContent = `Zone ${zone}${side} R${row}  ·  Act: ${d.activity.toFixed(0)}  ·  ${ls}  ·  ${d.temp.toFixed(1)}°C  ${d.humidity.toFixed(0)}%RH${layerExtra}`;
+        if (window.REAL_MODE && !DEPLOYED_PEN_IDXS.includes(idx)) {
+          tip.textContent = `Zone ${zone}${side} R${row}  ·  No live sensor deployed`;
+        } else if (window.REAL_MODE) {
+          tip.textContent = `Zone ${zone}${side} R${row} (Node 1)  ·  Act: ${d.activity.toFixed(0)}  ·  Clustering: ${d.clustering.toFixed(2)}  ·  ${d.temp.toFixed(1)}°C  ${d.humidity.toFixed(0)}%RH`;
+        } else {
+          const ls = d.litter < 0.35 ? 'Friable' : d.litter < 0.65 ? 'Saturated' : 'Caked';
+          const layerExtra = {
+            welfare:     `  ·  Welfare: ${d.welfare}/100`,
+            fcr:         `  ·  FCR: ${d.fcr}  ·  ${d.fcr < 1.5 ? '✓ Efficient' : d.fcr < 1.7 ? '⚠ Watch' : '✗ Poor'}`,
+            weight:      `  ·  Weight: ~${d.weight}g  ·  Std: 890g  ·  ${d.weight >= 890 ? '+' : ''}${d.weight - 890}g`,
+          }[currentLayer] || '';
+          tip.textContent = `Zone ${zone}${side} R${row}  ·  Act: ${d.activity.toFixed(0)}  ·  ${ls}  ·  ${d.temp.toFixed(1)}°C  ${d.humidity.toFixed(0)}%RH${layerExtra}`;
+        }
       }
       tip.style.display = 'block';
     } else {
@@ -1377,8 +1461,26 @@ const aiResponses = {
   default: `I don't have a specific pre-loaded answer for that question, but in a real deployment I would query the live sensor database and return zone-specific data with full trend analysis. Try one of the suggested questions on the right for a detailed response.`
 };
 
+function getRealModeResponse(q) {
+  const d = penData[DEPLOYED_PEN_IDXS[0]];
+  if (q.includes('alert')) {
+    return 'No active alerts. Live sensor data from Node 1 (Zone 3L) is within nominal range.';
+  }
+  if (q.includes('cluster')) {
+    return `Current clustering intensity in Zone 3L (Node 1): ${d.clustering.toFixed(2)}. ${d.clustering > 0.4 ? 'This is elevated — worth monitoring.' : 'This is within the normal range.'}`;
+  }
+  if (q.includes('temp') || q.includes('humid')) {
+    return `Zone 3L (Node 1) live readings — Temperature: ${d.temp.toFixed(1)}°C, Humidity: ${d.humidity.toFixed(0)}%.`;
+  }
+  if (q.includes('activity')) {
+    return `Zone 3L (Node 1) current activity index: ${Math.round(d.activity)}/100, based on live mmWave readings.`;
+  }
+  return `I currently only have live data from Node 1 (Zone 3L): activity ${Math.round(d.activity)}/100, clustering ${d.clustering.toFixed(2)}, temperature ${d.temp.toFixed(1)}°C, humidity ${d.humidity.toFixed(0)}%. Other zones have no deployed sensors yet.`;
+}
+
 function getAIResponse(q) {
   q = q.toLowerCase();
+  if (window.REAL_MODE) return getRealModeResponse(q);
   if (q.includes('fpd') || q.includes('footpad')) return aiResponses.fpd;
   if (q.includes('compare') || q.includes('previous') || q.includes('flock')) return aiResponses.compare;
   if (q.includes('avoidance') || q.includes('avoiding')) return aiResponses.avoidance;
@@ -1466,7 +1568,7 @@ function afpQuery(q) {
   showTyping();
   setTimeout(() => {
     removeTyping();
-    const k = Object.keys(afpResponses).find(k => q.toLowerCase().includes(k.toLowerCase().slice(0,-1)));
+    const k = !window.REAL_MODE && Object.keys(afpResponses).find(k => q.toLowerCase().includes(k.toLowerCase().slice(0,-1)));
     appendFloat('assistant', k ? afpResponses[k] : getAIResponse(q));
   }, 1100);
 }
@@ -1489,8 +1591,8 @@ document.getElementById('afp-input').addEventListener('keydown', e => {
 //  LIVE DATA — FlockSense API
 // ═══════════════════════════════════════════════
 // Maps real RPi node IDs to pen indices in the 3D shed model.
-// Node 1 -> Zone 1L Row 1 (idx 0), Node 2 -> Zone 1R Row 1 (idx 24)
-const LIVE_NODE_PEN_MAP = { node1: 0, node2: 24 };
+// Node 1 covers all 4 row-pens of Zone 3L (col=2, side=L): idx = row*6 + 2
+const LIVE_NODE_PEN_MAP = { node1: [2, 8, 14, 20] };
 
 // Backend API — same FastAPI service that ingests RPi sensor readings.
 const API_BASE = 'https://flocksense-api-production.up.railway.app';
@@ -1502,14 +1604,17 @@ async function fetchLiveData() {
     const rows = await res.json();
 
     rows.forEach(row => {
-      const idx = LIVE_NODE_PEN_MAP[row.node_id];
-      if (idx !== undefined && penData[idx]) {
-        const d = penData[idx];
-        if (row.activity_score != null) d.activity = row.activity_score;
-        if (row.clustering_score != null) d.clustering = row.clustering_score;
-        if (row.temperature != null) d.temp = row.temperature;
-        if (row.humidity != null) d.humidity = row.humidity;
-        if (row.bird_count != null) d.birdCount = row.bird_count;
+      const idxs = LIVE_NODE_PEN_MAP[row.node_id];
+      if (idxs) {
+        idxs.forEach(idx => {
+          const d = penData[idx];
+          if (!d) return;
+          if (row.activity_score != null) d.activity = row.activity_score;
+          if (row.clustering_score != null) d.clustering = row.clustering_score;
+          if (row.temperature != null) d.temp = row.temperature;
+          if (row.humidity != null) d.humidity = row.humidity;
+          if (row.bird_count != null) d.birdCount = row.bird_count;
+        });
       }
 
       const img = document.getElementById('camera-' + row.node_id);
@@ -1522,10 +1627,48 @@ async function fetchLiveData() {
       const activeBtn = document.querySelector('.layer-btn.active');
       window.updateLayer(activeBtn ? activeBtn.dataset.layer : 'activity');
     }
+    updateRealModeKPIs();
   } catch (e) {
     console.warn('[live data] fetch failed', e);
   }
 }
+
+// ═══════════════════════════════════════════════
+//  DUMMY / REAL MODE TOGGLE
+// ═══════════════════════════════════════════════
+function updateRealModeKPIs() {
+  if (!window.REAL_MODE) return;
+  const d = penData[DEPLOYED_PEN_IDXS[0]];
+  const actEl = document.getElementById('kpi-activity-value');
+  if (actEl) actEl.textContent = Math.round(d.activity);
+  const tempEl = document.getElementById('kpi-temp-value');
+  if (tempEl) tempEl.innerHTML = d.temp.toFixed(1) + '<span style="font-size:16px;font-weight:400;color:var(--text-2)">°C</span>';
+  const humEl = document.getElementById('kpi-humidity-value');
+  if (humEl) humEl.textContent = d.humidity.toFixed(0) + '%';
+}
+
+function applyMode(mode) {
+  const real = mode === 'real';
+  window.REAL_MODE = real;
+  localStorage.setItem('flocksense-mode', mode);
+  document.body.classList.toggle('real-mode', real);
+  document.getElementById('mode-switch').classList.toggle('on', real);
+  document.getElementById('mode-label').textContent = real ? 'Live Data Only' : 'Demo Mode';
+
+  if (typeof window.updateLayer === 'function') {
+    let activeBtn = document.querySelector('.layer-btn.active');
+    if (real && activeBtn && activeBtn.classList.contains('demo-only')) {
+      activeBtn = document.querySelector('.layer-btn[data-layer="activity"]');
+    }
+    window.updateLayer(activeBtn ? activeBtn.dataset.layer : 'activity');
+  }
+
+  updateRealModeKPIs();
+}
+
+document.getElementById('mode-switch').addEventListener('click', () => {
+  applyMode(window.REAL_MODE ? 'dummy' : 'real');
+});
 
 // ═══════════════════════════════════════════════
 //  INIT
@@ -1535,6 +1678,8 @@ window.addEventListener('DOMContentLoaded', () => {
   drawSparkline('spark-activity', [72,75,78,76,80,82,84], '#28d472');
   drawDonut('donut-litter', [78,16,6], ['#28d472','#d97706','#7c3a0a']);
   tabInitialized['dashboard'] = true;
+
+  applyMode(localStorage.getItem('flocksense-mode') === 'real' ? 'real' : 'dummy');
 
   fetchLiveData();
   setInterval(fetchLiveData, 10000);
