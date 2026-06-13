@@ -34,9 +34,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 
 /* ── NAV ── */
 nav{height:var(--nav-h);display:flex;align-items:center;padding:0 18px;background:rgba(9,12,20,.96);border-bottom:1px solid var(--border);position:relative;z-index:200;gap:0;flex-shrink:0;}
-.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-.3px;margin-right:32px;white-space:nowrap;}
-.logo span{color:var(--cyan);}
-.logo em{color:var(--text-2);font-style:normal;font-weight:600;}
+.logo{display:flex;align-items:center;margin-right:32px;white-space:nowrap;}
+.logo img{height:40px;width:auto;display:block;}
 .nav-tabs{display:flex;gap:2px;flex:1;}
 .nav-tab{background:none;border:none;color:var(--text-2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:6px 16px;border-radius:4px;cursor:pointer;transition:all .15s;position:relative;}
 .nav-tab:hover{color:var(--text);background:var(--bg-s2);}
@@ -301,7 +300,7 @@ body.real-mode .real-only.grid{display:grid;}
 
 <!-- NAV -->
 <nav>
-  <div class="logo"><span>Flock</span><em>Sense</em></div>
+  <div class="logo"><img src="assets/prf-logo-mark.png" alt="PRF — Enhancing poultry performance"></div>
   <div class="nav-tabs">
     <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
     <button class="nav-tab" data-tab="birdhealth">Bird Health</button>
